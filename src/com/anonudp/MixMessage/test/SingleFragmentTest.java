@@ -72,14 +72,12 @@ class SingleFragmentTest extends TestCase {
 
     @Test
     void toBytes() {
-        try (FileOutputStream fos = new FileOutputStream("/home/michael/Schreibtisch/packet2.bytes")) {
+        try {
             assertEquals(Fragment.FRAGMENT_LENGTH, this.fragment.toBytes().length);
 
             Fragment copy = new Fragment(this.fragment.toBytes());
 
             assertArrayEquals(this.fragment.toBytes(), copy.toBytes());
-
-            fos.write(this.fragment.toBytes());
         } catch (IOException e) {
             e.printStackTrace();
             fail();
