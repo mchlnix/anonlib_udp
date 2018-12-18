@@ -26,7 +26,7 @@ class SingleFragmentTest extends TestCase {
 
         this.padding_size_bytes = new byte[]{0x01, (byte) 0xFB};
 
-        this.fragment = new Fragment(1234, 0, true, this.payload, Fragment.FRAGMENT_DATA_PAYLOAD);
+        this.fragment = new Fragment(1234, 0, this.payload, Fragment.FRAGMENT_DATA_PAYLOAD);
     }
 
     @Test

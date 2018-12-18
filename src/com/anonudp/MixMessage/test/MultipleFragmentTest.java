@@ -15,15 +15,19 @@ class MultipleFragmentTest extends TestCase {
     private Fragment fragment1;
     private Fragment fragment2;
 
-    private int message_id = 1;
-    private byte[] message_id_bytes1 = {0x00, 0x04};
-    private byte[] message_id_bytes2 = {0x00, 0x07};
+    private int message_id;
+    private byte[] message_id_bytes1;
+    private byte[] message_id_bytes2;
     private byte[] payload;
     private byte[] padding_size_bytes_frag1;
     private byte[] padding_size_bytes_frag2;
 
     @BeforeEach
     protected void setUp() {
+        this.message_id = 1;
+        this.message_id_bytes1 = new byte[]{0x00, 0x04};
+        this.message_id_bytes2 = new byte[]{0x00, 0x07};
+
         int payload_length = 500;
 
         this.payload = new byte[payload_length];
@@ -34,10 +38,10 @@ class MultipleFragmentTest extends TestCase {
 
         this.padding_size_bytes_frag2 = new Padding(44).getLengthAsBytes();
 
-        this.fragment1 = new Fragment(this.message_id, 0, false,
+        this.fragment1 = new Fragment(this.message_id, 0,
                 this.payload, Fragment.FRAGMENT_DATA_PAYLOAD);
 
-        this.fragment2 = new Fragment(this.message_id, 1, true,
+        this.fragment2 = new Fragment(this.message_id, 1,
                 Arrays.copyOfRange(this.payload, this.fragment1.getPayload().length, this.payload.length),
                 Fragment.FRAGMENT_DATA_PAYLOAD);
     }

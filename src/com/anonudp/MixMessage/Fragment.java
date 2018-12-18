@@ -21,18 +21,19 @@ public class Fragment {
 
     private Padding padding;
 
-    public Fragment(int message_id, int fragment_number, boolean is_last_fragment, byte[] payload, int payload_limit) {
-        if (fragment_number == 0 && payload.length <= FRAGMENT_DATA_PAYLOAD + 1) {
+    public Fragment(int message_id, int fragment_number, byte[] payload, int payload_limit) {
+        if (fragment_number == 0 && payload.length <= payload_limit + 1) {
             this.message_id = SINGLE_FRAGMENT_MESSAGE_ID;
 
-            is_last_fragment = true;
             payload_limit += 1;
-        } else
+        }
+        else {
             this.message_id = message_id;
+        }
+
+        this.last_fragment = payload.length <= payload_limit;
 
         this.fragment_number = fragment_number;
-
-        this.last_fragment = is_last_fragment;
 
         this.padding = new Padding(payload_limit - payload.length);
 
