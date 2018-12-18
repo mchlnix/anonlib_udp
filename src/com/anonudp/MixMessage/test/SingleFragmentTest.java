@@ -46,7 +46,7 @@ class SingleFragmentTest extends TestCase {
 
     @Test
     void isLast_fragment() {
-        assertTrue(this.fragment.isLast_fragment());
+        assertTrue(this.fragment.isLast());
     }
 
     @Test

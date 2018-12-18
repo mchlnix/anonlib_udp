@@ -70,8 +70,8 @@ class MultipleFragmentTest extends TestCase {
 
     @Test
     void isLast_fragment() {
-        assertFalse(this.fragment1.isLast_fragment());
-        assertTrue(this.fragment2.isLast_fragment());
+        assertFalse(this.fragment1.isLast());
+        assertTrue(this.fragment2.isLast());
     }
 
     @Test

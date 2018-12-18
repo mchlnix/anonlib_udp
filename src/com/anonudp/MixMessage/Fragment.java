@@ -11,12 +11,12 @@ public class Fragment {
     public static final int FRAGMENT_LENGTH = FRAGMENT_ID_SIZE + FRAGMENT_INDEX_SIZE + FRAGMENT_DATA_PAYLOAD;
     public static final int SINGLE_FRAGMENT_MESSAGE_ID = 0;
     public static final int SINGLE_FRAGMENT_FRAGMENT_NUMBER = 0;
-    private static final int has_padding_bit = 0x01;
-    private static final int is_last_fragment_bit = 0x02;
+    private static final int HAS_PADDING_BIT = 0x01;
+    private static final int LAST_FRAGMENT_BIT = 0x02;
 
     private int message_id;
     private int fragment_number;
-    private boolean last_fragment;
+    private boolean last;
     private byte[] payload;
 
     private Padding padding;
@@ -31,7 +31,7 @@ public class Fragment {
             this.message_id = message_id;
         }
 
-        this.last_fragment = payload.length <= payload_limit;
+        this.last = payload.length <= payload_limit;
 
         this.fragment_number = fragment_number;
 
@@ -54,12 +54,12 @@ public class Fragment {
         this.message_id += fragment[current_offset];
         this.message_id >>= 2;
 
-        this.last_fragment = (fragment[current_offset] & is_last_fragment_bit) > 0;
+        this.last = (fragment[current_offset] & LAST_FRAGMENT_BIT) > 0;
 
-        if (message_id == 0 && !last_fragment)
+        if (message_id == 0 && !last)
             throw new IllegalArgumentException("Message should only contain one fragment, but the given fragment was not the last.");
 
-        boolean has_padding = (fragment[current_offset] & has_padding_bit) > 0;
+        boolean has_padding = (fragment[current_offset] & HAS_PADDING_BIT) > 0;
 
         ++current_offset;
 
@@ -94,8 +94,8 @@ public class Fragment {
         return fragment_number;
     }
 
-    public boolean isLast_fragment() {
-        return last_fragment;
+    public boolean isLast() {
+        return last;
     }
 
     public byte[] getPayload() {
@@ -118,11 +118,11 @@ public class Fragment {
 
         message_id_and_flags <<= 2;
 
-        if (this.last_fragment)
-            message_id_and_flags |= is_last_fragment_bit;
+        if (this.last)
+            message_id_and_flags |= LAST_FRAGMENT_BIT;
 
         if (this.getPadding_length() > 0)
-            message_id_and_flags |= has_padding_bit;
+            message_id_and_flags |= HAS_PADDING_BIT;
 
         bos.write(message_id_and_flags >> 8 & 0xFF);
         bos.write(message_id_and_flags & 0xFF);
