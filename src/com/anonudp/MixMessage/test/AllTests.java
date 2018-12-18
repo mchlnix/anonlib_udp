@@ -15,7 +15,7 @@ public class AllTests extends TestCase {
     public static Test suite()
     {
         TestSuite suite = new TestSuite(AllTests.class.getName());
-        suite.addTestSuite(FragmentTest.class);
+        suite.addTestSuite(SingleFragmentTest.class);
 
         return suite;
     }
