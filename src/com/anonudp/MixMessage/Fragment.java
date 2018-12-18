@@ -11,7 +11,7 @@ public class Fragment {
     public static final int FRAGMENT_LENGTH = FRAGMENT_ID_SIZE + FRAGMENT_INDEX_SIZE + FRAGMENT_DATA_PAYLOAD;
     public static final int SINGLE_FRAGMENT_MESSAGE_ID = 0;
     public static final int SINGLE_FRAGMENT_FRAGMENT_NUMBER = 0;
-    private static final int has_padding_bit = 0x01;
+    public static final int has_padding_bit = 0x01;
     private static final int is_last_fragment_bit = 0x02;
 
     private int message_id;
@@ -33,9 +33,13 @@ public class Fragment {
         this.fragment_number = fragment_number;
 
         this.last_fragment = is_last_fragment;
-        this.payload = payload;
 
         this.calculate_padding(payload_limit - payload.length);
+
+        if (payload.length > payload_limit)
+            this.payload = Arrays.copyOf(payload, payload_limit);
+        else
+            this.payload = payload;
     }
 
     public Fragment(byte[] fragment) {
@@ -70,6 +74,11 @@ public class Fragment {
             this.padding_from_bytes(fragment, current_offset);
 
             current_offset += this.padding_bytes.length;
+        }
+        else
+        {
+            this.padding_length = 0;
+            this.padding_bytes = new byte[0];
         }
 
         int payload_length = FRAGMENT_LENGTH - current_offset - this.padding_length;
@@ -131,10 +140,7 @@ public class Fragment {
     }
 
     private void calculate_padding(int padding_length) {
-        if (padding_length < 0 || padding_length > FRAGMENT_LENGTH)
-            throw new IllegalArgumentException("Padding must be between 0 and " + FRAGMENT_LENGTH + ".");
-
-        if (padding_length == 0) {
+       if (padding_length <= 0) {
             this.padding_length = 0;
             this.padding_bytes = new byte[0];
         } else if (padding_length == 1) {
