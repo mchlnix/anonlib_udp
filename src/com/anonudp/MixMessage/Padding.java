@@ -21,7 +21,6 @@ public class Padding {
             this.internal_padding_length = 0;
             this.byte_representation = new byte[]{(byte) 0x80}; // padding size byte is already padding
         } else {
-            // calculate actual padding length
             int padding_bytes_needed = (int) Math.ceil(log2(padding_length) / 7);
 
             padding_length -= padding_bytes_needed;
@@ -42,6 +41,11 @@ public class Padding {
 
             this.byte_representation[byte_representation.length - 1] |= END_BIT;
         }
+    }
+
+    public Padding(byte[] padding_byte_representation)
+    {
+        this(padding_byte_representation, 0);
     }
 
     Padding(byte[] padding_byte_representation, int offset)
@@ -74,13 +78,13 @@ public class Padding {
         return byte_representation;
     }
 
-    byte[] getPaddingBytes()
+    public byte[] getPaddingBytes()
     {
         // todo: make padding bytes random
         return new byte[this.internal_padding_length];
     }
 
-    int getLength()
+    public int getLength()
     {
         return this.internal_padding_length;
     }
