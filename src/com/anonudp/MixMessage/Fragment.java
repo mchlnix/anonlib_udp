@@ -11,15 +11,15 @@ public class Fragment {
     public static final int FRAGMENT_LENGTH = FRAGMENT_ID_SIZE + FRAGMENT_INDEX_SIZE + FRAGMENT_DATA_PAYLOAD;
     public static final int SINGLE_FRAGMENT_MESSAGE_ID = 0;
     public static final int SINGLE_FRAGMENT_FRAGMENT_NUMBER = 0;
-    public static final int has_padding_bit = 0x01;
+    private static final int has_padding_bit = 0x01;
     private static final int is_last_fragment_bit = 0x02;
 
     private int message_id;
     private int fragment_number;
     private boolean last_fragment;
     private byte[] payload;
-    private int padding_length;
-    private byte[] padding_bytes;
+
+    private Padding padding;
 
     public Fragment(int message_id, int fragment_number, boolean is_last_fragment, byte[] payload, int payload_limit) {
         if (fragment_number == 0 && payload.length <= FRAGMENT_DATA_PAYLOAD + 1) {
@@ -34,7 +34,7 @@ public class Fragment {
 
         this.last_fragment = is_last_fragment;
 
-        this.calculate_padding(payload_limit - payload.length);
+        this.padding = new Padding(payload_limit - payload.length);
 
         if (payload.length > payload_limit)
             this.payload = Arrays.copyOf(payload, payload_limit);
@@ -71,17 +71,16 @@ public class Fragment {
         }
 
         if (has_padding) {
-            this.padding_from_bytes(fragment, current_offset);
+            this.padding = new Padding(fragment, current_offset);
 
-            current_offset += this.padding_bytes.length;
+            current_offset += this.getPadding_bytes().length;
         }
         else
         {
-            this.padding_length = 0;
-            this.padding_bytes = new byte[0];
+            this.padding = new Padding(0);
         }
 
-        int payload_length = FRAGMENT_LENGTH - current_offset - this.padding_length;
+        int payload_length = FRAGMENT_LENGTH - current_offset - this.padding.getLength();
 
         this.payload = Arrays.copyOfRange(fragment, current_offset, current_offset + payload_length);
     }
@@ -103,11 +102,11 @@ public class Fragment {
     }
 
     public int getPadding_length() {
-        return padding_length;
+        return this.padding.getLength();
     }
 
     public byte[] getPadding_bytes() {
-        return padding_bytes;
+        return this.padding.getLengthAsBytes();
     }
 
     public byte[] toBytes() throws IOException
@@ -121,7 +120,7 @@ public class Fragment {
         if (this.last_fragment)
             message_id_and_flags |= is_last_fragment_bit;
 
-        if (this.padding_length > 0)
+        if (this.getPadding_length() > 0)
             message_id_and_flags |= has_padding_bit;
 
         bos.write(message_id_and_flags >> 8 & 0xFF);
@@ -130,79 +129,12 @@ public class Fragment {
         if (this.message_id != 0)
             bos.write(this.fragment_number);
 
-        bos.write(this.padding_bytes);
+        bos.write(this.getPadding_bytes());
 
         bos.write(this.payload);
 
-        bos.write(new byte[this.padding_length]);
+        bos.write(this.padding.getPaddingBytes());
 
         return bos.toByteArray();
-    }
-
-    private void calculate_padding(int padding_length) {
-       if (padding_length <= 0) {
-            this.padding_length = 0;
-            this.padding_bytes = new byte[0];
-        } else if (padding_length == 1) {
-            this.padding_length = 0;
-            this.padding_bytes = new byte[]{(byte) 0x80}; // padding size byte is already padding
-        } else {
-            // calculate actual padding length
-            int padding_bytes_needed = (int) Math.ceil(log2(padding_length) / 7);
-
-            padding_length -= padding_bytes_needed;
-
-            this.padding_length = padding_length;
-
-
-            // calculate padding length byte representation
-            int padding_end_mask = 0x80;
-            int padding_value_mask = 0x7F;
-
-            this.padding_bytes = new byte[padding_bytes_needed];
-
-            int padding_byte_index = 1;
-
-            while (padding_length > 0) {
-                padding_bytes[padding_bytes.length - padding_byte_index] = ((byte) (padding_length & padding_value_mask));
-
-                padding_length >>= 7;
-
-                ++padding_byte_index;
-            }
-
-            this.padding_bytes[padding_bytes.length - 1] |= padding_end_mask;
-        }
-
-    }
-
-    private static double log2(double num) {
-        return (Math.log(num) / Math.log(2));
-    }
-
-    private void padding_from_bytes(byte[] padding_bytes, int offset)
-    {
-        if (padding_bytes.length == 0)
-            throw new IllegalArgumentException("No padding bytes given as argument.");
-
-        int padding_end_mask = 0x80;
-        int padding_value_mask = 0x7F;
-
-        this.padding_length = 0;
-
-        int bytes_read = 0;
-
-        for (int i = offset; i < padding_bytes.length; ++i) {
-            this.padding_length += padding_bytes[i] & padding_value_mask;
-
-            ++bytes_read;
-
-            if ((padding_bytes[i] & padding_end_mask) == padding_end_mask)
-                break;
-
-            this.padding_length <<= 7;
-        }
-
-        this.padding_bytes = Arrays.copyOfRange(padding_bytes, offset, offset + bytes_read);
     }
 }

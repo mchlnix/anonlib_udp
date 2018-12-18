@@ -1,6 +1,7 @@
 package com.anonudp.MixMessage.test;
 
 import com.anonudp.MixMessage.Fragment;
+import com.anonudp.MixMessage.Padding;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,13 +30,13 @@ class MultipleFragmentTest extends TestCase {
 
         Arrays.fill(this.payload, (byte) 0x01);
 
-        int padding_end_bit = 0x80;
+        this.padding_size_bytes_frag1 = new Padding(0).getLengthAsBytes();
 
-        this.padding_size_bytes_frag1 = new byte[0];
-        this.padding_size_bytes_frag2 = new byte[]{(byte) (43 | padding_end_bit)};
+        this.padding_size_bytes_frag2 = new Padding(44).getLengthAsBytes();
 
         this.fragment1 = new Fragment(this.message_id, 0, false,
                 this.payload, Fragment.FRAGMENT_DATA_PAYLOAD);
+
         this.fragment2 = new Fragment(this.message_id, 1, true,
                 Arrays.copyOfRange(this.payload, this.fragment1.getPayload().length, this.payload.length),
                 Fragment.FRAGMENT_DATA_PAYLOAD);
