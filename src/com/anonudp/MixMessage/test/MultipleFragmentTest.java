@@ -5,18 +5,18 @@ import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class MultipleFragmentTest extends TestCase {
     private Fragment fragment1;
     private Fragment fragment2;
 
     private int message_id = 1;
-    private byte[] message_id_bytes = {0x00, 0x07};
+    private byte[] message_id_bytes1 = {0x00, 0x04};
+    private byte[] message_id_bytes2 = {0x00, 0x07};
     private byte[] payload;
     private byte[] padding_size_bytes_frag1;
     private byte[] padding_size_bytes_frag2;
@@ -45,6 +45,16 @@ class MultipleFragmentTest extends TestCase {
     void getMessage_id() {
         assertEquals(this.message_id, this.fragment1.getMessage_id());
         assertEquals(this.message_id, this.fragment2.getMessage_id());
+
+        try {
+            assertArrayEquals(this.message_id_bytes1, Arrays.copyOf(this.fragment1.toBytes(),
+                    this.message_id_bytes1.length));
+            assertArrayEquals(this.message_id_bytes2, Arrays.copyOf(this.fragment2.toBytes(),
+                    this.message_id_bytes2.length));
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
     }
 
     @Test
