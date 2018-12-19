@@ -4,22 +4,24 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
-class Message {
+public class Message {
     private int id;
     private HashMap<Integer, byte[]> payloads;
     private int fragment_count;
 
-    Message(int id)
+    public Message(int id)
     {
         this.id = id;
         this.payloads = new HashMap<>();
-        this.fragment_count = 0;
+        this.fragment_count = -1;
     }
 
-    void addFragment(Fragment fragment) {
-        assert fragment.getMessage_id() == this.id;
+    public void addFragment(Fragment fragment) {
+        if (fragment.getMessage_id() != this.id)
+            throw new MessageIdMismatchException(this.id, fragment.getMessage_id());
 
-        assert ! this.payloads.containsKey(fragment.getFragment_number());
+        if (this.payloads.containsKey(fragment.getFragment_number()))
+            throw new DuplicateFragmentException(fragment.getFragment_number());
         
         this.payloads.put(fragment.getFragment_number(), fragment.getPayload());
         
@@ -27,12 +29,12 @@ class Message {
             this.fragment_count = fragment.getFragment_number() + 1;
     }
 
-    boolean isDone()
+    public boolean isDone()
     {
         return this.fragment_count > 0 && this.payloads.size() == this.fragment_count;
     }
 
-    byte[] getPayload()
+    public byte[] getPayload()
     {
         if (! this.isDone())
             return new byte[0];
@@ -47,6 +49,21 @@ class Message {
         } catch (IOException e) {
             e.printStackTrace();
             return new byte[0];
+        }
+    }
+
+    public class DuplicateFragmentException extends IllegalArgumentException
+    {
+        DuplicateFragmentException(int fragment_number)
+        {
+            super("Fragment number: " + fragment_number + " was already processed.");
+        }
+    }
+
+    public class MessageIdMismatchException extends IllegalArgumentException
+    {
+        MessageIdMismatchException(int message_id, int fragment_id) {
+            super("Id of this message: " + message_id + ". Fragment id: " + fragment_id);
         }
     }
 }
