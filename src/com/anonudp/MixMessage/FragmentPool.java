@@ -7,7 +7,7 @@ import java.util.NoSuchElementException;
 public class FragmentPool implements Iterator<byte[]> {
     private HashMap<Integer, Message> messages;
 
-    FragmentPool()
+    public FragmentPool()
     {
         this.messages = new HashMap<>();
     }
@@ -20,6 +20,11 @@ public class FragmentPool implements Iterator<byte[]> {
             this.messages.put(message_id, new Message(message_id));
 
         this.messages.get(message_id).addFragment(fragment);
+    }
+
+    public int size()
+    {
+        return this.messages.size();
     }
 
     @Override
