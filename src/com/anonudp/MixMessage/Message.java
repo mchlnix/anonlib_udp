@@ -4,9 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class Message {
-    private int id;
-    private HashMap<Integer, byte[]> payloads;
+class Message {
+    private final int id;
+    private final HashMap<Integer, byte[]> payloads;
     private int fragment_count;
 
     public Message(int id)

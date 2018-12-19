@@ -1,4 +1,4 @@
-package com.anonudp.MixMessage;
+package com.anonudp.MixMessage.crypto;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;

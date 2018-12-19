@@ -1,4 +1,4 @@
-package com.anonudp.MixMessage;
+package com.anonudp.MixMessage.crypto;
 
 import org.bouncycastle.math.ec.ECPoint;
 
@@ -10,11 +10,11 @@ import java.io.IOException;
 import java.security.*;
 import java.util.Arrays;
 
-class PublicKey
+public class PublicKey
 {
-    private ECPoint underlyingValue;
+    private final ECPoint underlyingValue;
 
-    PublicKey(PrivateKey privateKey)
+    public PublicKey(PrivateKey privateKey)
     {
         this.underlyingValue = EccGroup713.powInGroup(EccGroup713.getGenerator(), privateKey.getUnderlyingValue());
     }
@@ -24,7 +24,7 @@ class PublicKey
         this.underlyingValue = point;
     }
 
-    byte[] toSymmetricKey() throws IOException, NoSuchAlgorithmException {
+    public byte[] toSymmetricKey() throws IOException, NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -39,14 +39,14 @@ class PublicKey
         return Arrays.copyOf(hash, EccGroup713.symmetricKeyLength);
     }
 
-    PublicKey blind(PrivateKey privateKey)
+    public PublicKey blind(PrivateKey privateKey)
     {
         BlindingFactor blindingFactor = new BlindingFactor(privateKey);
 
         return this.blind(blindingFactor);
     }
 
-    PublicKey blind(PublicKey publicKey) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
+    public PublicKey blind(PublicKey publicKey) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
         BlindingFactor blindingFactor = new BlindingFactor(publicKey);
 
         return this.blind(blindingFactor);

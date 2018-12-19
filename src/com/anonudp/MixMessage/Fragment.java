@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class Fragment {
+class Fragment {
     public static final int FRAGMENT_DATA_PAYLOAD = 272;
     public static final int FRAGMENT_ID_SIZE = 2;
     private static final int FRAGMENT_INDEX_SIZE = 1;
@@ -16,7 +16,7 @@ public class Fragment {
 
     private int message_id;
     private int fragment_number;
-    private boolean last;
+    private final boolean last;
     private byte[] payload;
 
     private Padding padding;

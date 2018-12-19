@@ -1,4 +1,4 @@
-package com.anonudp.MixMessage.test;
+package com.anonudp.MixMessage;
 
 import com.anonudp.MixMessage.Fragment;
 import junit.framework.TestCase;
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 class SingleFragmentTest extends TestCase {
     private Fragment fragment;
 
-    private byte[] message_id_bytes = {0x00, 0x03};
+    private final byte[] message_id_bytes = {0x00, 0x03};
     private byte[] payload;
     private byte[] padding_size_bytes;
 

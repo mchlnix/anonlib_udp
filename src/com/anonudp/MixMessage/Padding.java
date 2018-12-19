@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import static com.anonudp.MixMessage.Util.log2;
 
-public class Padding {
+class Padding {
     private static final int END_BIT = 0x80;
     private static final int VALUE_MASK = 0x7F;
 

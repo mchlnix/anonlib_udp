@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class FragmentPool implements Iterator<byte[]> {
-    private HashMap<Integer, Message> messages;
+class FragmentPool implements Iterator<byte[]> {
+    private final HashMap<Integer, Message> messages;
 
     public FragmentPool()
     {

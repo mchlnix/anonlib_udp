@@ -1,4 +1,4 @@
-package com.anonudp.MixMessage;
+package com.anonudp.MixMessage.crypto;
 
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECParameterSpec;
@@ -13,12 +13,12 @@ import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
 import java.security.*;
 
-class EccGroup713 {
+public class EccGroup713 {
     private static final ECParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp224r1");
     private static final ECPoint generator = spec.getG();
     private static final BigInteger order = spec.getCurve().getOrder();
 
-    static final int symmetricKeyLength = 16;
+    public static final int symmetricKeyLength = 16;
 
     private EccGroup713() {}
 

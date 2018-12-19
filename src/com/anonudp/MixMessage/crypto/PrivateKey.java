@@ -1,4 +1,4 @@
-package com.anonudp.MixMessage;
+package com.anonudp.MixMessage.crypto;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
 
-class PrivateKey
+public class PrivateKey
 {
-    private BigInteger underlyingValue;
-    private static SecureRandom random = new SecureRandom();
+    private final BigInteger underlyingValue;
+    private static final SecureRandom random = new SecureRandom();
 
-    PrivateKey()
+    public PrivateKey()
     {
         BigInteger randomNumber;
 
@@ -32,7 +32,7 @@ class PrivateKey
         return underlyingValue;
     }
 
-    PrivateKey blind(PublicKey disposableKey) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
+    public PrivateKey blind(PublicKey disposableKey) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
         BlindingFactor blindingFactor = new BlindingFactor(disposableKey);
 
         BigInteger newValue = this.underlyingValue.multiply(blindingFactor.getUnderlyingValue());

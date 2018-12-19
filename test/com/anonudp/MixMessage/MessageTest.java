@@ -1,4 +1,4 @@
-package com.anonudp.MixMessage.test;
+package com.anonudp.MixMessage;
 
 import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.Message;

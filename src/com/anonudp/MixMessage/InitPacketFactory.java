@@ -1,5 +1,9 @@
 package com.anonudp.MixMessage;
 
+import com.anonudp.MixMessage.crypto.EccGroup713;
+import com.anonudp.MixMessage.crypto.PrivateKey;
+import com.anonudp.MixMessage.crypto.PublicKey;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -14,7 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
-public class InitPacketFactory {
+class InitPacketFactory {
     private PublicKey[] publicKeys;
 
 
@@ -113,9 +117,9 @@ public class InitPacketFactory {
 
     class InitPacket
     {
-        private PublicKey publicKey;
-        private byte[] channelKeyOnion;
-        private byte[] payloadOnion;
+        private final PublicKey publicKey;
+        private final byte[] channelKeyOnion;
+        private final byte[] payloadOnion;
 
         InitPacket(PublicKey publicKey, byte[] channelKeyOnion, byte[] payloadOnion)
         {
@@ -127,7 +131,7 @@ public class InitPacketFactory {
 
     class ProcessedInitPacket extends InitPacket
     {
-        private byte[] channelKey;
+        private final byte[] channelKey;
 
         private ProcessedInitPacket(byte[] channelKey, PublicKey element, byte[] processedChannelOnion, byte[] processedPayloadOnion)
         {
