@@ -1,7 +1,5 @@
 package com.anonudp.MixMessage;
 
-import com.anonudp.MixMessage.Fragment;
-import com.anonudp.MixMessage.Message;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

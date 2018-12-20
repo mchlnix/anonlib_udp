@@ -93,7 +93,7 @@ class InitPacketFactory {
             cipher = createCTRCipher(disposableKeys[i].toSymmetricKey(), Cipher.ENCRYPT_MODE);
 
             bos.write(channelKeys[i]);
-            bos.write(Arrays.copyOfRange(channelOnion, EccGroup713.symmetricKeyLength, channelOnion.length));
+            bos.write(Arrays.copyOf(channelOnion, channelOnion.length - EccGroup713.symmetricKeyLength));
 
             channelOnion = cipher.doFinal(bos.toByteArray());
             payloadOnion = cipher.doFinal(payloadOnion);
@@ -115,7 +115,7 @@ class InitPacketFactory {
         return cipher;
     }
 
-    class InitPacket
+    static class InitPacket
     {
         private final PublicKey publicKey;
         private final byte[] channelKeyOnion;
@@ -127,13 +127,42 @@ class InitPacketFactory {
             this.channelKeyOnion = channelKeyOnion;
             this.payloadOnion = payloadOnion;
         }
+
+        PublicKey getPublicKey() {
+            return publicKey;
+        }
+
+        byte[] getChannelKeyOnion() {
+            return channelKeyOnion;
+        }
+
+        byte[] getPayloadOnion() {
+            return payloadOnion;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof ProcessedInitPacket)
+                return this.equals((ProcessedInitPacket) obj);
+
+            return super.equals(obj);
+        }
+
+        boolean equals(ProcessedInitPacket otherPacket)
+        {
+            boolean is_equal = this.publicKey == otherPacket.getPublicKey();
+            is_equal = is_equal && this.channelKeyOnion == otherPacket.getChannelKeyOnion();
+            is_equal = is_equal &&  this.payloadOnion == otherPacket.getPayloadOnion();
+
+            return is_equal;
+        }
     }
 
-    class ProcessedInitPacket extends InitPacket
+    static class ProcessedInitPacket extends InitPacket
     {
         private final byte[] channelKey;
 
-        private ProcessedInitPacket(byte[] channelKey, PublicKey element, byte[] processedChannelOnion, byte[] processedPayloadOnion)
+        ProcessedInitPacket(byte[] channelKey, PublicKey element, byte[] processedChannelOnion, byte[] processedPayloadOnion)
         {
             super(element, processedChannelOnion, processedPayloadOnion);
 
@@ -143,6 +172,15 @@ class InitPacketFactory {
         byte[] getChannelKey()
         {
             return this.channelKey;
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (obj instanceof InitPacket)
+                return ((InitPacket) obj).equals(this);
+
+            return super.equals(obj);
         }
     }
 }
