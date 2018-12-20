@@ -1,9 +1,8 @@
 package com.anonudp.MixMessage;
 
-import com.anonudp.MixMessage.Fragment;
-import com.anonudp.MixMessage.Padding;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -46,6 +45,7 @@ class MultipleFragmentTest extends TestCase {
                 Fragment.FRAGMENT_DATA_PAYLOAD);
     }
 
+    @DisplayName("Message id is correctly encoded")
     @Test
     void getMessage_id() {
         assertEquals(this.message_id, this.fragment1.getMessage_id());
@@ -62,18 +62,21 @@ class MultipleFragmentTest extends TestCase {
         }
     }
 
+    @DisplayName("Fragment number is correctly counted up")
     @Test
     void getFragment_number() {
         assertEquals(0, this.fragment1.getFragment_number());
         assertEquals(1, this.fragment2.getFragment_number());
     }
 
+    @DisplayName("Last fragment is correctly identified")
     @Test
     void isLast_fragment() {
         assertFalse(this.fragment1.isLast());
         assertTrue(this.fragment2.isLast());
     }
 
+    @DisplayName("Payload is correctly split up and returned")
     @Test
     void getPayload() {
         assertEquals(Fragment.FRAGMENT_DATA_PAYLOAD, this.fragment1.getPayload().length);
@@ -85,6 +88,7 @@ class MultipleFragmentTest extends TestCase {
         assertArrayEquals(Arrays.copyOfRange(this.payload, this.fragment1.getPayload().length, this.payload.length), this.fragment2.getPayload());
     }
 
+    @DisplayName("Padding length is correctly calculated")
     @Test
     void getPadding_length() {
         assertEquals(0, this.fragment1.getPadding_length());
@@ -94,12 +98,14 @@ class MultipleFragmentTest extends TestCase {
         assertEquals(expected_padding_length, this.fragment2.getPadding_length());
     }
 
+    @DisplayName("Padding size bytes are correctly encoded")
     @Test
     void getPadding_bytes() {
         assertArrayEquals(this.padding_size_bytes_frag1, this.fragment1.getPadding_bytes());
         assertArrayEquals(this.padding_size_bytes_frag2, this.fragment2.getPadding_bytes());
     }
 
+    @DisplayName("From/ToBytes conversion")
     @Test
     void toBytes() {
         try {

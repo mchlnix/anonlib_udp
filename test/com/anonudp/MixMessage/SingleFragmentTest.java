@@ -1,8 +1,8 @@
 package com.anonudp.MixMessage;
 
-import com.anonudp.MixMessage.Fragment;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -29,6 +29,7 @@ class SingleFragmentTest extends TestCase {
         this.fragment = new Fragment(1234, 0, this.payload, Fragment.FRAGMENT_DATA_PAYLOAD);
     }
 
+    @DisplayName("Single fragment message id is used")
     @Test
     void getMessage_id() {
         try {
@@ -39,16 +40,19 @@ class SingleFragmentTest extends TestCase {
         }
     }
 
+    @DisplayName("Correct fragment number is applied")
     @Test
     void getFragment_number() {
         assertEquals(Fragment.SINGLE_FRAGMENT_FRAGMENT_NUMBER, this.fragment.getFragment_number());
     }
 
+    @DisplayName("Is identified as last")
     @Test
     void isLast_fragment() {
         assertTrue(this.fragment.isLast());
     }
 
+    @DisplayName("Payload is returned correctly")
     @Test
     void getPayload() {
         assertEquals(this.payload.length, this.fragment.getPayload().length);
@@ -56,6 +60,7 @@ class SingleFragmentTest extends TestCase {
         assertArrayEquals(this.payload, this.fragment.getPayload());
     }
 
+    @DisplayName("Padding length is returned correctly")
     @Test
     void getPadding_length() {
         int expected = Fragment.FRAGMENT_LENGTH - Fragment.FRAGMENT_ID_SIZE -
@@ -64,11 +69,13 @@ class SingleFragmentTest extends TestCase {
         assertEquals(expected, this.fragment.getPadding_length());
     }
 
+    @DisplayName("Padding bytes are calculated correctly")
     @Test
     void getPadding_bytes() {
         assertArrayEquals(this.padding_size_bytes, this.fragment.getPadding_bytes());
     }
 
+    @DisplayName("From/ToBytes conversion")
     @Test
     void toBytes() {
         try {

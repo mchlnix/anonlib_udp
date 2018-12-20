@@ -1,11 +1,11 @@
 package com.anonudp.MixMessage;
 
-import com.anonudp.MixMessage.Padding;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class PaddingIntTest extends TestCase {
     private Padding case0;
@@ -31,6 +31,7 @@ class PaddingIntTest extends TestCase {
         case272 = new Padding(272);
     }
 
+    @DisplayName("Calculate correct padding length bytes")
     @Test
     void getLengthAsBytes() {
         assertArrayEquals(new byte[0], case0.getLengthAsBytes());
@@ -44,6 +45,7 @@ class PaddingIntTest extends TestCase {
         assertArrayEquals(new byte[]{0x02, (byte) 0x8E}, case272.getLengthAsBytes());
     }
 
+    @DisplayName("Return the correct amount of padding bytes")
     @Test
     void getPaddingBytes() {
         assertEquals(0, case0.getPaddingBytes().length);
@@ -57,6 +59,7 @@ class PaddingIntTest extends TestCase {
         assertEquals(270, case272.getPaddingBytes().length);
     }
 
+    @DisplayName("Return the correct amount of necessary padding")
     @Test
     void getLength() {
         assertEquals(0, case0.getLength());
