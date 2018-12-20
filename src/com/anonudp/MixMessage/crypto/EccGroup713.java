@@ -20,6 +20,11 @@ public class EccGroup713 {
 
     public static final int symmetricKeyLength = 16;
 
+    static
+    {
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+    }
+
     private EccGroup713() {}
 
     static ECPoint getGenerator() {
