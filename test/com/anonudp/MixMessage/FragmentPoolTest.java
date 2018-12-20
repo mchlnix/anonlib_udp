@@ -1,10 +1,8 @@
 package com.anonudp.MixMessage;
 
-import com.anonudp.MixMessage.Fragment;
-import com.anonudp.MixMessage.FragmentPool;
-import com.anonudp.MixMessage.Message;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -43,37 +41,20 @@ class FragmentPoolTest extends TestCase {
                 Fragment.FRAGMENT_DATA_PAYLOAD);
     }
 
+    @DisplayName("Exception on adding duplicate fragments")
     @Test
-    void addFragment() {
+    void addFragmentThrows()
+    {
         this.pool.addFragment(this.single_fragment);
 
         assertEquals(1, this.pool.size());
 
         assertTrue(this.pool.hasNext());
 
-        // test Duplicate Fragment Exception
         assertThrows(Message.DuplicateFragmentException.class, () -> this.pool.addFragment(this.single_fragment));
-
-        byte[] expected_payload = this.single_fragment.getPayload();
-
-        assertArrayEquals(expected_payload, this.pool.next());
-
-        assertEquals(0, this.pool.size());
-        assertFalse(this.pool.hasNext());
-
-        this.pool.addFragment(this.double_fragment_part1);
-        this.pool.addFragment(this.double_fragment_part2);
-
-        assertEquals(1, this.pool.size());
-
-        assertTrue(this.pool.hasNext());
-
-        assertArrayEquals(this.double_fragment_payload, this.pool.next());
-
-        assertEquals(0, this.pool.size());
-        assertFalse(this.pool.hasNext());
     }
 
+    @DisplayName("Iterator - hasNext()")
     @Test
     void hasNext() {
         assertEquals(0, this.pool.size());
@@ -105,6 +86,19 @@ class FragmentPoolTest extends TestCase {
         assertFalse(this.pool.hasNext());
     }
 
+    @DisplayName("Iterator - hasNext() is false for incomplete payloads")
+    @Test
+    void hasNextIncomplete() {
+        this.pool.addFragment(this.double_fragment_part1);
+
+        assertFalse(this.pool.hasNext());
+
+        this.pool.addFragment(this.double_fragment_part2);
+
+        assertTrue(this.pool.hasNext());
+    }
+
+    @DisplayName("Iterator - next()")
     @Test
     void next() {
         this.pool.addFragment(this.single_fragment);
