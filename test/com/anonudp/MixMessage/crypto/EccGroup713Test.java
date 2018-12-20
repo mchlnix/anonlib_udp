@@ -3,6 +3,7 @@ package com.anonudp.MixMessage.crypto;
 import junit.framework.TestCase;
 import org.bouncycastle.math.ec.ECPoint;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import javax.crypto.BadPaddingException;
@@ -12,6 +13,7 @@ import java.math.BigInteger;
 import java.security.*;
 import java.util.Arrays;
 
+import static com.anonudp.MixMessage.Util.randomBytes;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EccGroup713Test extends TestCase {
@@ -20,6 +22,7 @@ class EccGroup713Test extends TestCase {
     protected void setUp() {
     }
 
+    @DisplayName("Group multiplication")
     @Test
     void powInGroup() {
         ECPoint base = EccGroup713.getGenerator();
@@ -45,18 +48,33 @@ class EccGroup713Test extends TestCase {
         assertNotEquals(powerOf3, powerOf16);
     }
 
+    @DisplayName("PublicKey from symmetric key is deterministic")
     @Test
-    void hb() {
+    void hb1() {
         int arrayLength = EccGroup713.symmetricKeyLength;
-        byte[] randomBytes = new byte[arrayLength];
-
-        new SecureRandom().nextBytes(randomBytes);
+        byte[] randomBytes = randomBytes(arrayLength);
 
         assertFalse(Arrays.equals(new byte[arrayLength], randomBytes));
 
         try {
             assertEquals(EccGroup713.hb(randomBytes), EccGroup713.hb(randomBytes));
 
+            assertNotEquals(EccGroup713.hb(new byte[arrayLength]), EccGroup713.hb(randomBytes));
+        } catch (NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @DisplayName("PublicKey from symmetric key returns different results")
+    @Test
+    void hb2() {
+        int arrayLength = EccGroup713.symmetricKeyLength;
+        byte[] randomBytes = randomBytes(arrayLength);
+
+        assertFalse(Arrays.equals(new byte[arrayLength], randomBytes));
+
+        try {
             assertNotEquals(EccGroup713.hb(new byte[arrayLength]), EccGroup713.hb(randomBytes));
         } catch (NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
