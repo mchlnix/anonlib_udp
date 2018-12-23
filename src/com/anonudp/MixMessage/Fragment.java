@@ -7,13 +7,15 @@ import java.io.IOException;
 import java.util.Arrays;
 
 class Fragment {
-    static final int FRAGMENT_DATA_PAYLOAD = 272;
+    static final int DATA_PAYLOAD_SIZE = 272;
     // TODO: get rid of magic numbers
-    static final int FRAGMENT_INIT_PAYLOAD = FRAGMENT_DATA_PAYLOAD - (29 + 3 * EccGroup713.symmetricKeyLength + 6 - (3-1) * 8);
-    static final int FRAGMENT_ID_SIZE = 2;
-    private static final int FRAGMENT_INDEX_SIZE = 1;
-    static final int FRAGMENT_DATA_LENGTH = FRAGMENT_ID_SIZE + FRAGMENT_INDEX_SIZE + FRAGMENT_DATA_PAYLOAD;
-    static final int FRAGMENT_INIT_LENGTH = FRAGMENT_ID_SIZE + FRAGMENT_INDEX_SIZE + FRAGMENT_INIT_PAYLOAD;
+    static final int INIT_PAYLOAD_SIZE = DATA_PAYLOAD_SIZE - (29 + 3 * EccGroup713.symmetricKeyLength + 6 - (3-1) * 8);
+    static final int ID_SIZE = 2;
+    private static final int INDEX_SIZE = 1;
+    private static final int HEADER_SIZE = ID_SIZE + INDEX_SIZE;
+    static final int DATA_FRAGMENT_SIZE = HEADER_SIZE + DATA_PAYLOAD_SIZE;
+    // TODO: actually calculate
+    static final int INIT_FRAGMENT_SIZE = HEADER_SIZE + INIT_PAYLOAD_SIZE;
     static final int SINGLE_FRAGMENT_MESSAGE_ID = 0;
     static final int SINGLE_FRAGMENT_FRAGMENT_NUMBER = 0;
     private static final int HAS_PADDING_BIT = 0x01;

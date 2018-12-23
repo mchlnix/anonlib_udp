@@ -31,14 +31,14 @@ class FragmentPoolTest extends TestCase {
 
         int message_id = 10;
 
-        this.single_fragment = new Fragment(Fragment.SINGLE_FRAGMENT_MESSAGE_ID, Fragment.SINGLE_FRAGMENT_FRAGMENT_NUMBER, this.single_fragment_payload, Fragment.FRAGMENT_DATA_PAYLOAD);
+        this.single_fragment = new Fragment(Fragment.SINGLE_FRAGMENT_MESSAGE_ID, Fragment.SINGLE_FRAGMENT_FRAGMENT_NUMBER, this.single_fragment_payload, Fragment.DATA_PAYLOAD_SIZE);
 
         this.double_fragment_part1 = new Fragment(message_id, 0,
-                this.double_fragment_payload, Fragment.FRAGMENT_DATA_PAYLOAD);
+                this.double_fragment_payload, Fragment.DATA_PAYLOAD_SIZE);
 
         this.double_fragment_part2 = new Fragment(message_id, 1,
                 Arrays.copyOfRange(this.double_fragment_payload, this.double_fragment_part1.getPayload().length, this.double_fragment_payload.length),
-                Fragment.FRAGMENT_DATA_PAYLOAD);
+                Fragment.DATA_PAYLOAD_SIZE);
     }
 
     @DisplayName("Exception on adding duplicate fragments")

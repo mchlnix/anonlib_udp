@@ -50,9 +50,9 @@ class InitPacketFactoryTest extends TestCase {
         InitPacketFactory.InitPacket packet = null;
 
         try {
-            Fragment initFragment = new Fragment(1234, 0, this.payload, Fragment.FRAGMENT_INIT_PAYLOAD);
+            Fragment initFragment = new Fragment(1234, 0, this.payload, Fragment.INIT_PAYLOAD_SIZE);
 
-            assertEquals(initFragment.toBytes().length, Fragment.FRAGMENT_INIT_LENGTH);
+            assertEquals(initFragment.toBytes().length, Fragment.INIT_FRAGMENT_SIZE);
 
             packet = this.factory.makePacket(this.channelKeys, initFragment);
         } catch (Exception e) {
@@ -98,9 +98,9 @@ class InitPacketFactoryTest extends TestCase {
     @Test
     void makePacket() {
         try {
-            Fragment initFragment = new Fragment(1234, 0, this.payload, Fragment.FRAGMENT_INIT_PAYLOAD);
+            Fragment initFragment = new Fragment(1234, 0, this.payload, Fragment.INIT_PAYLOAD_SIZE);
 
-            assertEquals(initFragment.toBytes().length, Fragment.FRAGMENT_INIT_LENGTH);
+            assertEquals(initFragment.toBytes().length, Fragment.INIT_FRAGMENT_SIZE);
 
             this.factory.makePacket(this.channelKeys, initFragment);
         } catch (Exception e) {

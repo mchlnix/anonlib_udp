@@ -38,11 +38,11 @@ class MultipleFragmentTest extends TestCase {
         this.padding_size_bytes_frag2 = new Padding(44).getLengthAsBytes();
 
         this.fragment1 = new Fragment(this.message_id, 0,
-                this.payload, Fragment.FRAGMENT_DATA_PAYLOAD);
+                this.payload, Fragment.DATA_PAYLOAD_SIZE);
 
         this.fragment2 = new Fragment(this.message_id, 1,
                 Arrays.copyOfRange(this.payload, this.fragment1.getPayload().length, this.payload.length),
-                Fragment.FRAGMENT_DATA_PAYLOAD);
+                Fragment.DATA_PAYLOAD_SIZE);
     }
 
     @DisplayName("Message id is correctly encoded")
@@ -79,9 +79,9 @@ class MultipleFragmentTest extends TestCase {
     @DisplayName("Payload is correctly split up and returned")
     @Test
     void getPayload() {
-        assertEquals(Fragment.FRAGMENT_DATA_PAYLOAD, this.fragment1.getPayload().length);
+        assertEquals(Fragment.DATA_PAYLOAD_SIZE, this.fragment1.getPayload().length);
 
-        assertArrayEquals(Arrays.copyOf(this.payload, Fragment.FRAGMENT_DATA_PAYLOAD), this.fragment1.getPayload());
+        assertArrayEquals(Arrays.copyOf(this.payload, Fragment.DATA_PAYLOAD_SIZE), this.fragment1.getPayload());
 
         assertEquals(this.payload.length - this.fragment1.getPayload().length, this.fragment2.getPayload().length);
 
@@ -93,7 +93,7 @@ class MultipleFragmentTest extends TestCase {
     void getPadding_length() {
         assertEquals(0, this.fragment1.getPadding_length());
 
-        int expected_padding_length = Fragment.FRAGMENT_DATA_PAYLOAD - (this.payload.length % Fragment.FRAGMENT_DATA_PAYLOAD) - this.padding_size_bytes_frag2.length;
+        int expected_padding_length = Fragment.DATA_PAYLOAD_SIZE - (this.payload.length % Fragment.DATA_PAYLOAD_SIZE) - this.padding_size_bytes_frag2.length;
 
         assertEquals(expected_padding_length, this.fragment2.getPadding_length());
     }
@@ -109,13 +109,13 @@ class MultipleFragmentTest extends TestCase {
     @Test
     void toBytes() {
         try {
-            assertEquals(Fragment.FRAGMENT_DATA_LENGTH, this.fragment1.toBytes().length);
+            assertEquals(Fragment.DATA_FRAGMENT_SIZE, this.fragment1.toBytes().length);
 
             Fragment copy1 = new Fragment(this.fragment1.toBytes());
 
             assertArrayEquals(this.fragment1.toBytes(), copy1.toBytes());
 
-            assertEquals(Fragment.FRAGMENT_DATA_LENGTH, this.fragment2.toBytes().length);
+            assertEquals(Fragment.DATA_FRAGMENT_SIZE, this.fragment2.toBytes().length);
 
             Fragment copy2 = new Fragment(this.fragment2.toBytes());
 

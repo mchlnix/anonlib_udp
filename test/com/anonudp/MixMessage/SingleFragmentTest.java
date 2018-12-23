@@ -26,7 +26,7 @@ class SingleFragmentTest extends TestCase {
 
         this.padding_size_bytes = new byte[]{0x01, (byte) 0xFB};
 
-        this.fragment = new Fragment(1234, 0, this.payload, Fragment.FRAGMENT_DATA_PAYLOAD);
+        this.fragment = new Fragment(1234, 0, this.payload, Fragment.DATA_PAYLOAD_SIZE);
     }
 
     @DisplayName("Single fragment message id is used")
@@ -63,7 +63,7 @@ class SingleFragmentTest extends TestCase {
     @DisplayName("Padding length is returned correctly")
     @Test
     void getPadding_length() {
-        int expected = Fragment.FRAGMENT_DATA_LENGTH - Fragment.FRAGMENT_ID_SIZE -
+        int expected = Fragment.DATA_FRAGMENT_SIZE - Fragment.ID_SIZE -
                 this.fragment.getPadding_bytes().length - this.fragment.getPayload().length;
 
         assertEquals(expected, this.fragment.getPadding_length());
@@ -79,7 +79,7 @@ class SingleFragmentTest extends TestCase {
     @Test
     void toBytes() {
         try {
-            assertEquals(Fragment.FRAGMENT_DATA_LENGTH, this.fragment.toBytes().length);
+            assertEquals(Fragment.DATA_FRAGMENT_SIZE, this.fragment.toBytes().length);
 
             Fragment copy = new Fragment(this.fragment.toBytes());
 

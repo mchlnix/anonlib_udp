@@ -25,12 +25,12 @@ class MessageTest extends TestCase {
     @Test
     void addFragment() {
         byte[] payload1 = new byte[500];
-        Fragment fragment1 = new Fragment(this.message_id, 0, payload1, Fragment.FRAGMENT_DATA_PAYLOAD);
+        Fragment fragment1 = new Fragment(this.message_id, 0, payload1, Fragment.DATA_PAYLOAD_SIZE);
 
         this.message.addFragment(fragment1);
 
         byte[] payload2 = Arrays.copyOfRange(payload1, fragment1.getPayload().length, payload1.length);
-        Fragment fragment2 = new Fragment(this.message_id + 1, 1, payload2, Fragment.FRAGMENT_DATA_PAYLOAD);
+        Fragment fragment2 = new Fragment(this.message_id + 1, 1, payload2, Fragment.DATA_PAYLOAD_SIZE);
 
         assertThrows(Message.MessageIdMismatchException.class, () -> this.message.addFragment(fragment2));
     }
@@ -40,7 +40,7 @@ class MessageTest extends TestCase {
     void fragmentDuplicate()
     {
         byte[] payload1 = new byte[500];
-        Fragment fragment1 = new Fragment(this.message_id, 0, payload1, Fragment.FRAGMENT_DATA_PAYLOAD);
+        Fragment fragment1 = new Fragment(this.message_id, 0, payload1, Fragment.DATA_PAYLOAD_SIZE);
 
         this.message.addFragment(fragment1);
         assertThrows(Message.DuplicateFragmentException.class, () -> this.message.addFragment(fragment1));
@@ -49,7 +49,7 @@ class MessageTest extends TestCase {
     @DisplayName("Message is done after a single fragment")
     @Test
     void isDone() {
-        Fragment fragment = new Fragment(Fragment.SINGLE_FRAGMENT_MESSAGE_ID, Fragment.SINGLE_FRAGMENT_FRAGMENT_NUMBER, new byte[0], Fragment.FRAGMENT_DATA_PAYLOAD);
+        Fragment fragment = new Fragment(Fragment.SINGLE_FRAGMENT_MESSAGE_ID, Fragment.SINGLE_FRAGMENT_FRAGMENT_NUMBER, new byte[0], Fragment.DATA_PAYLOAD_SIZE);
 
         Message message = new Message(Fragment.SINGLE_FRAGMENT_MESSAGE_ID);
 
@@ -62,14 +62,14 @@ class MessageTest extends TestCase {
     @Test
     void isDone2() {
         byte[] payload1 = new byte[500];
-        Fragment fragment1 = new Fragment(this.message_id, 0, payload1, Fragment.FRAGMENT_DATA_PAYLOAD);
+        Fragment fragment1 = new Fragment(this.message_id, 0, payload1, Fragment.DATA_PAYLOAD_SIZE);
 
         this.message.addFragment(fragment1);
 
         assertFalse(this.message.isDone());
 
         byte[] payload2 = Arrays.copyOfRange(payload1, fragment1.getPayload().length, payload1.length);
-        Fragment fragment2 = new Fragment(this.message_id, 1, payload2, Fragment.FRAGMENT_DATA_PAYLOAD);
+        Fragment fragment2 = new Fragment(this.message_id, 1, payload2, Fragment.DATA_PAYLOAD_SIZE);
 
         this.message.addFragment(fragment2);
 
@@ -80,13 +80,13 @@ class MessageTest extends TestCase {
     @Test
     void getPayload() {
         byte[] payload1 = new byte[500];
-        Fragment fragment1 = new Fragment(this.message_id, 0, payload1, Fragment.FRAGMENT_DATA_PAYLOAD);
+        Fragment fragment1 = new Fragment(this.message_id, 0, payload1, Fragment.DATA_PAYLOAD_SIZE);
 
         this.message.addFragment(fragment1);
 
 
         byte[] payload2 = Arrays.copyOfRange(payload1, fragment1.getPayload().length, payload1.length);
-        Fragment fragment2 = new Fragment(this.message_id, 1, payload2, Fragment.FRAGMENT_DATA_PAYLOAD);
+        Fragment fragment2 = new Fragment(this.message_id, 1, payload2, Fragment.DATA_PAYLOAD_SIZE);
 
         this.message.addFragment(fragment2);
 
