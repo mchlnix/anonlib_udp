@@ -24,9 +24,15 @@ class Fragment {
     private final boolean last;
     private byte[] payload;
 
+    private boolean bytesCached;
+    private byte[] byteArrayCache;
+
     private Padding padding;
 
     Fragment(int message_id, int fragment_number, byte[] payload, int payload_limit) {
+        if (payload_limit != INIT_PAYLOAD_SIZE && payload_limit != DATA_PAYLOAD_SIZE)
+            throw new IllegalArgumentException("Payload limit is not an accepted value. Used Fragment.FRAGMENT_*_PAYLOAD instead.");
+
         if (fragment_number == 0 && payload.length <= payload_limit + 1) {
             this.message_id = SINGLE_FRAGMENT_MESSAGE_ID;
 
