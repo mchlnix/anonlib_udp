@@ -8,8 +8,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -17,6 +15,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
+
+import static com.anonudp.MixMessage.crypto.Util.createCTRCipher;
 
 class InitPacketFactory {
     private PublicKey[] publicKeys;
@@ -103,17 +103,6 @@ class InitPacketFactory {
         }
 
         return new InitPacket(publicMessageKey, channelOnion, payloadOnion);
-    }
-
-    private Cipher createCTRCipher(byte[] symmetricDisposableKey, int mode) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
-        Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "BC");
-
-        SecretKeySpec keySpec = new SecretKeySpec(symmetricDisposableKey, "AES");
-        IvParameterSpec ivSpec = new IvParameterSpec(new byte[EccGroup713.symmetricKeyLength]);
-
-        cipher.init(mode, keySpec, ivSpec);
-
-        return cipher;
     }
 
     static class InitPacket
