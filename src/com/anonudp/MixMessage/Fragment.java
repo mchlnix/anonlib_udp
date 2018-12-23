@@ -55,6 +55,9 @@ class Fragment {
     }
 
     Fragment(byte[] fragment) {
+        this.bytesCached = false;
+        this.byteArrayCache = new byte[fragment.length];
+
         int current_offset = 0;
 
         this.message_id = fragment[current_offset];
@@ -123,30 +126,37 @@ class Fragment {
 
     byte[] toBytes() throws IOException
     {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        if (! this.bytesCached)
+        {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        int message_id_and_flags = this.message_id;
+            int message_id_and_flags = this.message_id;
 
-        message_id_and_flags <<= 2;
+            message_id_and_flags <<= 2;
 
-        if (this.last)
-            message_id_and_flags |= LAST_FRAGMENT_BIT;
+            if (this.last)
+                message_id_and_flags |= LAST_FRAGMENT_BIT;
 
-        if (this.getPadding_length() > 0)
-            message_id_and_flags |= HAS_PADDING_BIT;
+            if (this.getPadding_length() > 0)
+                message_id_and_flags |= HAS_PADDING_BIT;
 
-        bos.write(message_id_and_flags >> 8 & 0xFF);
-        bos.write(message_id_and_flags & 0xFF);
+            bos.write(message_id_and_flags >> 8 & 0xFF);
+            bos.write(message_id_and_flags & 0xFF);
 
-        if (this.message_id != 0)
-            bos.write(this.fragment_number);
+            if (this.message_id != 0)
+                bos.write(this.fragment_number);
 
-        bos.write(this.getPadding_bytes());
+            bos.write(this.getPadding_bytes());
 
-        bos.write(this.payload);
+            bos.write(this.payload);
 
-        bos.write(this.padding.getPaddingBytes());
+            bos.write(this.padding.getPaddingBytes());
 
-        return bos.toByteArray();
+            this.byteArrayCache = bos.toByteArray();
+
+            assert bos.size() == this.byteArrayCache.length;
+        }
+
+        return this.byteArrayCache;
     }
 }
