@@ -33,6 +33,9 @@ class Fragment {
         if (payload_limit != INIT_PAYLOAD_SIZE && payload_limit != DATA_PAYLOAD_SIZE)
             throw new IllegalArgumentException("Payload limit is not an accepted value. Used Fragment.FRAGMENT_*_PAYLOAD instead.");
 
+        this.bytesCached = false;
+        this.byteArrayCache = new byte[HEADER_SIZE + payload_limit];
+
         if (fragment_number == 0 && payload.length <= payload_limit + 1) {
             this.message_id = SINGLE_FRAGMENT_MESSAGE_ID;
 
@@ -152,9 +155,9 @@ class Fragment {
 
             bos.write(this.padding.getPaddingBytes());
 
-            this.byteArrayCache = bos.toByteArray();
-
             assert bos.size() == this.byteArrayCache.length;
+
+            this.byteArrayCache = bos.toByteArray();
         }
 
         return this.byteArrayCache;
