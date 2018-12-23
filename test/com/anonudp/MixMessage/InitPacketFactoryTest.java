@@ -83,7 +83,7 @@ class InitPacketFactoryTest extends TestCase {
         PublicKey publicKey = new PublicKey(privateKey);
 
         byte[] channelKey = new byte[EccGroup713.symmetricKeyLength];
-        byte[] channelKeyOnion = new byte[3 * EccGroup713.symmetricKeyLength];
+        byte[] channelKeyOnion = new byte[this.channelKeys.length * EccGroup713.symmetricKeyLength];
         byte[] payloadOnion = new byte[100];
 
         InitPacketFactory.InitPacket packet = new InitPacketFactory.InitPacket(publicKey, channelKeyOnion, payloadOnion);
