@@ -109,13 +109,13 @@ class MultipleFragmentTest extends TestCase {
     @Test
     void toBytes() {
         try {
-            assertEquals(Fragment.FRAGMENT_LENGTH, this.fragment1.toBytes().length);
+            assertEquals(Fragment.FRAGMENT_DATA_LENGTH, this.fragment1.toBytes().length);
 
             Fragment copy1 = new Fragment(this.fragment1.toBytes());
 
             assertArrayEquals(this.fragment1.toBytes(), copy1.toBytes());
 
-            assertEquals(Fragment.FRAGMENT_LENGTH, this.fragment2.toBytes().length);
+            assertEquals(Fragment.FRAGMENT_DATA_LENGTH, this.fragment2.toBytes().length);
 
             Fragment copy2 = new Fragment(this.fragment2.toBytes());
 

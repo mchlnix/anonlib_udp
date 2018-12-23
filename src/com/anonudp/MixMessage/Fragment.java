@@ -1,16 +1,21 @@
 package com.anonudp.MixMessage;
 
+import com.anonudp.MixMessage.crypto.EccGroup713;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
 class Fragment {
-    public static final int FRAGMENT_DATA_PAYLOAD = 272;
-    public static final int FRAGMENT_ID_SIZE = 2;
+    static final int FRAGMENT_DATA_PAYLOAD = 272;
+    // TODO: get rid of magic numbers
+    static final int FRAGMENT_INIT_PAYLOAD = FRAGMENT_DATA_PAYLOAD - (29 + 3 * EccGroup713.symmetricKeyLength + 6 - (3-1) * 8);
+    static final int FRAGMENT_ID_SIZE = 2;
     private static final int FRAGMENT_INDEX_SIZE = 1;
-    public static final int FRAGMENT_LENGTH = FRAGMENT_ID_SIZE + FRAGMENT_INDEX_SIZE + FRAGMENT_DATA_PAYLOAD;
-    public static final int SINGLE_FRAGMENT_MESSAGE_ID = 0;
-    public static final int SINGLE_FRAGMENT_FRAGMENT_NUMBER = 0;
+    static final int FRAGMENT_DATA_LENGTH = FRAGMENT_ID_SIZE + FRAGMENT_INDEX_SIZE + FRAGMENT_DATA_PAYLOAD;
+    static final int FRAGMENT_INIT_LENGTH = FRAGMENT_ID_SIZE + FRAGMENT_INDEX_SIZE + FRAGMENT_INIT_PAYLOAD;
+    static final int SINGLE_FRAGMENT_MESSAGE_ID = 0;
+    static final int SINGLE_FRAGMENT_FRAGMENT_NUMBER = 0;
     private static final int HAS_PADDING_BIT = 0x01;
     private static final int LAST_FRAGMENT_BIT = 0x02;
 
@@ -21,7 +26,7 @@ class Fragment {
 
     private Padding padding;
 
-    public Fragment(int message_id, int fragment_number, byte[] payload, int payload_limit) {
+    Fragment(int message_id, int fragment_number, byte[] payload, int payload_limit) {
         if (fragment_number == 0 && payload.length <= payload_limit + 1) {
             this.message_id = SINGLE_FRAGMENT_MESSAGE_ID;
 
@@ -43,7 +48,7 @@ class Fragment {
             this.payload = payload;
     }
 
-    public Fragment(byte[] fragment) {
+    Fragment(byte[] fragment) {
         int current_offset = 0;
 
         this.message_id = fragment[current_offset];
@@ -81,36 +86,36 @@ class Fragment {
             this.padding = new Padding(0);
         }
 
-        int payload_length = FRAGMENT_LENGTH - current_offset - this.padding.getLength();
+        int payload_length = fragment.length - current_offset - this.padding.getLength();
 
         this.payload = Arrays.copyOfRange(fragment, current_offset, current_offset + payload_length);
     }
 
-    public int getMessage_id() {
+    int getMessage_id() {
         return message_id;
     }
 
-    public int getFragment_number() {
+    int getFragment_number() {
         return fragment_number;
     }
 
-    public boolean isLast() {
+    boolean isLast() {
         return last;
     }
 
-    public byte[] getPayload() {
+    byte[] getPayload() {
         return payload;
     }
 
-    public int getPadding_length() {
+    int getPadding_length() {
         return this.padding.getLength();
     }
 
-    public byte[] getPadding_bytes() {
+    byte[] getPadding_bytes() {
         return this.padding.getLengthAsBytes();
     }
 
-    public byte[] toBytes() throws IOException
+    byte[] toBytes() throws IOException
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 

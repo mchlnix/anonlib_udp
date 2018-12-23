@@ -63,7 +63,7 @@ class SingleFragmentTest extends TestCase {
     @DisplayName("Padding length is returned correctly")
     @Test
     void getPadding_length() {
-        int expected = Fragment.FRAGMENT_LENGTH - Fragment.FRAGMENT_ID_SIZE -
+        int expected = Fragment.FRAGMENT_DATA_LENGTH - Fragment.FRAGMENT_ID_SIZE -
                 this.fragment.getPadding_bytes().length - this.fragment.getPayload().length;
 
         assertEquals(expected, this.fragment.getPadding_length());
@@ -79,7 +79,7 @@ class SingleFragmentTest extends TestCase {
     @Test
     void toBytes() {
         try {
-            assertEquals(Fragment.FRAGMENT_LENGTH, this.fragment.toBytes().length);
+            assertEquals(Fragment.FRAGMENT_DATA_LENGTH, this.fragment.toBytes().length);
 
             Fragment copy = new Fragment(this.fragment.toBytes());
 

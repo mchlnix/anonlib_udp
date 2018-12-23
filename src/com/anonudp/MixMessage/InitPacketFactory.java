@@ -44,6 +44,7 @@ class InitPacketFactory {
 
         byte[] processedChannelOnion = cipher.doFinal(packet.channelKeyOnion);
 
+        // TODO: get rid of magic numbers
         byte[] channelKey = Arrays.copyOf(processedChannelOnion, 16);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -62,7 +63,7 @@ class InitPacketFactory {
         return new ProcessedInitPacket(channelKey, newElement, processedChannelOnion, processedPayloadOnion);
     }
 
-    InitPacket makePacket(byte[][] channelKeys, byte[] payload) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
+    InitPacket makePacket(byte[][] channelKeys, Fragment fragment) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
         PublicKey[] disposableKeys = new PublicKey[this.publicKeys.length];
 
         PrivateKey privateMessageKey = new PrivateKey();
@@ -81,7 +82,7 @@ class InitPacketFactory {
         /* preparing "onions" */
 
         byte[] channelOnion = new byte[EccGroup713.symmetricKeyLength * this.publicKeys.length];
-        byte[] payloadOnion = payload;
+        byte[] payloadOnion = fragment.toBytes();
 
         /* encrypt "onions" */
 
