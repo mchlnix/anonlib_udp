@@ -1,5 +1,6 @@
 package com.anonudp.MixMessage;
 
+import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.Util;
 
 import javax.crypto.BadPaddingException;
@@ -23,7 +24,7 @@ class DataPacketFactory {
     {
         this.channelKeys = channelKeys;
         this.mixCount = this.channelKeys.length;
-        this.counter = new Counter(0);
+        this.counter = new Counter();
     }
 
     DataPacket makePacket(Fragment fragment) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException, BadPaddingException, IllegalBlockSizeException {

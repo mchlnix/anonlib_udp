@@ -1,43 +1,43 @@
-package com.anonudp.MixMessage;
+package com.anonudp.MixMessage.crypto;
 
 import java.nio.ByteBuffer;
 
-class Counter {
-    static final int CTR_PREFIX_SIZE = 8;
+public class Counter {
+    public static final int CTR_PREFIX_SIZE = 8;
     private static final int CTR_PREFIX_OFFSET = CTR_PREFIX_SIZE - Integer.BYTES;
     private static final int IV_LENGTH = 16;
     private static final int IV_OFFSET = CTR_PREFIX_OFFSET;
 
     private int currentValue;
 
-    Counter()
+    public Counter()
     {
         this(0);
     }
 
-    Counter(int startValue)
+    public Counter(int startValue)
     {
         this.currentValue = startValue;
     }
 
-    Counter(byte[] prefix)
+    public Counter(byte[] prefix)
     {
         this(ByteBuffer.wrap(prefix).getInt(CTR_PREFIX_OFFSET));
 
         assert prefix.length == CTR_PREFIX_SIZE;
     }
 
-    int getCurrentValue()
+    public int getCurrentValue()
     {
         return this.currentValue;
     }
 
-    void count()
+    public void count()
     {
         ++this.currentValue;
     }
 
-    byte[] asPrefix()
+    public byte[] asPrefix()
     {
         ByteBuffer buffer = ByteBuffer.allocate(CTR_PREFIX_SIZE);
         buffer.putInt(CTR_PREFIX_OFFSET, this.currentValue);
@@ -45,7 +45,7 @@ class Counter {
         return buffer.array();
     }
 
-    byte[] asIV()
+    public byte[] asIV()
     {
         ByteBuffer buffer = ByteBuffer.allocate(IV_LENGTH);
         buffer.putInt(IV_OFFSET, this.currentValue);
