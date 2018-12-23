@@ -27,6 +27,11 @@ public class EccGroup713 {
 
     private EccGroup713() {}
 
+    static ECPoint loadPoint(byte[] encodedPoint)
+    {
+        return spec.getCurve().decodePoint(encodedPoint);
+    }
+
     static ECPoint getGenerator() {
         return generator;
     }

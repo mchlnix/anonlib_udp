@@ -61,9 +61,21 @@ public class PublicKey
         return this.underlyingValue;
     }
 
-    private byte[] toBytes()
+    public static PublicKey fromBytes(byte[] binaryKey)
+    {
+        return new PublicKey(EccGroup713.loadPoint(binaryKey));
+    }
+
+    public byte[] toBytes()
     {
         return this.underlyingValue.getEncoded(true);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof PublicKey)
+            return this.underlyingValue.equals(((PublicKey) obj).getUnderlyingValue());
+
+        return super.equals(obj);
+    }
 }
