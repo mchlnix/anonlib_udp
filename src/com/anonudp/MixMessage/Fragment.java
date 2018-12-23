@@ -6,10 +6,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
-class Fragment {
+public class Fragment {
     static final int DATA_PAYLOAD_SIZE = 272;
     // TODO: get rid of magic numbers
-    static final int INIT_PAYLOAD_SIZE = DATA_PAYLOAD_SIZE - (29 + 3 * EccGroup713.symmetricKeyLength + 6 - (3-1) * 8);
+    public static final int INIT_PAYLOAD_SIZE = DATA_PAYLOAD_SIZE - (29 + 3 * EccGroup713.symmetricKeyLength + 6 - (3-1) * 8);
     static final int ID_SIZE = 2;
     private static final int INDEX_SIZE = 1;
     private static final int HEADER_SIZE = ID_SIZE + INDEX_SIZE;
@@ -31,7 +31,7 @@ class Fragment {
 
     private Padding padding;
 
-    Fragment(int message_id, int fragment_number, byte[] payload, int payload_limit) {
+    public Fragment(int message_id, int fragment_number, byte[] payload, int payload_limit) {
         if (payload_limit != INIT_PAYLOAD_SIZE && payload_limit != DATA_PAYLOAD_SIZE)
             throw new IllegalArgumentException("Payload limit is not an accepted value. Used Fragment.FRAGMENT_*_PAYLOAD instead.");
 
@@ -59,7 +59,7 @@ class Fragment {
             this.payload = payload;
     }
 
-    Fragment(byte[] fragment) {
+    public Fragment(byte[] fragment) {
         this.bytesCached = false;
         this.byteArrayCache = new byte[fragment.length];
 

@@ -18,11 +18,11 @@ import java.util.Arrays;
 
 import static com.anonudp.MixMessage.crypto.Util.createCTRCipher;
 
-class InitPacketFactory {
+public class InitPacketFactory {
     private PublicKey[] publicKeys;
 
 
-    InitPacketFactory(PublicKey[] publicKeys)
+    public InitPacketFactory(PublicKey[] publicKeys)
     {
         if (publicKeys.length < 1)
             throw new IllegalArgumentException("Was given empty public key list.");
@@ -63,7 +63,7 @@ class InitPacketFactory {
         return new ProcessedInitPacket(channelKey, newElement, processedChannelOnion, processedPayloadOnion);
     }
 
-    InitPacket makePacket(byte[][] channelKeys, Fragment fragment) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
+    public InitPacket makePacket(byte[][] channelKeys, Fragment fragment) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
         PublicKey[] disposableKeys = new PublicKey[this.publicKeys.length];
 
         PrivateKey privateMessageKey = new PrivateKey();
@@ -105,7 +105,7 @@ class InitPacketFactory {
         return new InitPacket(publicMessageKey, channelOnion, payloadOnion);
     }
 
-    static class InitPacket
+    public static class InitPacket
     {
         private final PublicKey publicKey;
         private final byte[] channelKeyOnion;

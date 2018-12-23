@@ -14,7 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
-class DataPacketFactory {
+public class DataPacketFactory {
     private final Counter counter;
 
     private final byte[][] channelKeys;
@@ -60,7 +60,7 @@ class DataPacketFactory {
         return new ProcessedDataPacket(cipher.doFinal(packet.getData()));
     }
 
-    static class DataPacket
+    public static class DataPacket
     {
         private byte[] byteArray;
         private byte[] ctrPrefix;

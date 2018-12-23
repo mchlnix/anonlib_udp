@@ -57,8 +57,7 @@ public class PublicKey
         return new PublicKey(EccGroup713.powInGroup(this.underlyingValue, blindingFactor.getUnderlyingValue()));
     }
 
-
-    ECPoint getUnderlyingValue() {
+    private ECPoint getUnderlyingValue() {
         return this.underlyingValue;
     }
 
