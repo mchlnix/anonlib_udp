@@ -1,5 +1,6 @@
 package com.anonudp.MixMessage;
 
+import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.PrivateKey;
 import com.anonudp.MixMessage.crypto.PublicKey;
@@ -19,11 +20,15 @@ import java.util.Arrays;
 import static com.anonudp.MixMessage.crypto.Util.createCTRCipher;
 
 public class InitPacketFactory {
+    private byte[] channelID;
+
     private PublicKey[] publicKeys;
 
 
-    public InitPacketFactory(PublicKey[] publicKeys)
+    public InitPacketFactory(byte[] channelID, PublicKey[] publicKeys)
     {
+        this.channelID = channelID;
+
         if (publicKeys.length < 1)
             throw new IllegalArgumentException("Was given empty public key list.");
 
@@ -60,7 +65,7 @@ public class InitPacketFactory {
 
         PublicKey newElement = packet.publicKey.blind(disposableKey);
 
-        return new ProcessedInitPacket(channelKey, newElement, processedChannelOnion, processedPayloadOnion);
+        return new ProcessedInitPacket(this.channelID, channelKey, newElement, processedChannelOnion, processedPayloadOnion);
     }
 
     public InitPacket makePacket(byte[][] channelKeys, Fragment fragment) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
@@ -102,20 +107,36 @@ public class InitPacketFactory {
             bos.reset();
         }
 
-        return new InitPacket(publicMessageKey, channelOnion, payloadOnion);
+        return new InitPacket(channelID, publicMessageKey, channelOnion, payloadOnion);
     }
 
-    public static class InitPacket
+    public static class InitPacket implements Packet
     {
+        public static final byte INIT_PACKET = 0x02;
+
+        private final byte[] channelID;
+
         private final PublicKey publicKey;
         private final byte[] channelKeyOnion;
         private final byte[] payloadOnion;
 
-        InitPacket(PublicKey publicKey, byte[] channelKeyOnion, byte[] payloadOnion)
+        public InitPacket(byte[] channelID, PublicKey publicKey, byte[] channelKeyOnion, byte[] payloadOnion)
         {
+            this.channelID = channelID;
+
             this.publicKey = publicKey;
             this.channelKeyOnion = channelKeyOnion;
             this.payloadOnion = payloadOnion;
+        }
+
+        public InitPacket(byte[] channelID, byte[] data)
+        {
+            // todo make constants
+            this.channelID = channelID;
+
+            this.publicKey = PublicKey.fromBytes(Arrays.copyOf(data, 29));
+            this.channelKeyOnion = Arrays.copyOfRange(data, 29, 29 + EccGroup713.symmetricKeyLength * 3);
+            this.payloadOnion = Arrays.copyOfRange(data, 29 + EccGroup713.symmetricKeyLength * 3, data.length);
         }
 
         PublicKey getPublicKey() {
@@ -128,6 +149,38 @@ public class InitPacketFactory {
 
         byte[] getPayloadOnion() {
             return payloadOnion;
+        }
+
+        public byte[] toBytes() throws IOException {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+            bos.write(publicKey.toBytes());
+
+            bos.write(channelKeyOnion);
+
+            bos.write(payloadOnion);
+
+            return bos.toByteArray();
+        }
+
+        @Override
+        public byte getPacketType() {
+            return INIT_PACKET;
+        }
+
+        @Override
+        public byte[] getCTRPrefix() {
+            return Util.randomBytes(Counter.CTR_PREFIX_SIZE);
+        }
+
+        @Override
+        public byte[] getChannelID() {
+            return this.channelID;
+        }
+
+        @Override
+        public byte[] getData() throws IOException {
+            return this.toBytes();
         }
 
         @Override
@@ -152,9 +205,9 @@ public class InitPacketFactory {
     {
         private final byte[] channelKey;
 
-        ProcessedInitPacket(byte[] channelKey, PublicKey element, byte[] processedChannelOnion, byte[] processedPayloadOnion)
+        ProcessedInitPacket(byte[] channelID, byte[] channelKey, PublicKey element, byte[] processedChannelOnion, byte[] processedPayloadOnion)
         {
-            super(element, processedChannelOnion, processedPayloadOnion);
+            super(channelID, element, processedChannelOnion, processedPayloadOnion);
 
             this.channelKey = channelKey;
         }

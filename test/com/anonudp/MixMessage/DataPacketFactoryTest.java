@@ -12,6 +12,8 @@ class DataPacketFactoryTest extends TestCase {
     private byte[] payload;
     private byte[][] channelKeys;
 
+    private byte[] channelID;
+
     private DataPacketFactory factory;
 
     @BeforeEach
@@ -23,6 +25,8 @@ class DataPacketFactoryTest extends TestCase {
 
         int mixCount = 3;
 
+        this.channelID = new byte[]{0x01, 0x02};
+
         this.channelKeys = new byte[mixCount][EccGroup713.symmetricKeyLength];
 
         for (int i = 0; i < channelKeys.length; ++i)
@@ -30,7 +34,7 @@ class DataPacketFactoryTest extends TestCase {
             this.channelKeys[i] = Util.randomBytes(EccGroup713.symmetricKeyLength);
         }
 
-        this.factory = new DataPacketFactory(this.channelKeys);
+        this.factory = new DataPacketFactory(this.channelID, this.channelKeys);
     }
 
     @DisplayName("DataPacket creation throws no Exceptions")
@@ -79,8 +83,8 @@ class DataPacketFactoryTest extends TestCase {
     {
         byte[] payload = Util.randomBytes(200);
 
-        DataPacketFactory.DataPacket packet = new DataPacketFactory.DataPacket(payload);
-        DataPacketFactory.ProcessedDataPacket processedPacket = new DataPacketFactory.ProcessedDataPacket(payload);
+        DataPacketFactory.DataPacket packet = new DataPacketFactory.DataPacket(this.channelID, payload);
+        DataPacketFactory.ProcessedDataPacket processedPacket = new DataPacketFactory.ProcessedDataPacket(this.channelID, payload);
 
         assertEquals(packet, processedPacket);
         assertEquals(processedPacket, packet);

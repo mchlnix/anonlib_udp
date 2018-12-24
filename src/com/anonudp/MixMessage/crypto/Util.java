@@ -11,7 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
 public class Util {
-    private static int MAC_SIZE = 16;
+    static int GCM_MAC_SIZE = 16;
 
     public static Cipher createCTRCipher(byte[] symmetricKey, byte[] iv, int mode) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
         Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "BC");
@@ -32,7 +32,7 @@ public class Util {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC");
 
         SecretKeySpec keySpec = new SecretKeySpec(symmetricKey, "AES");
-        GCMParameterSpec gcmSpec = new GCMParameterSpec(MAC_SIZE * 8, iv);
+        GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_MAC_SIZE * 8, iv);
 
         cipher.init(mode, keySpec, gcmSpec);
 

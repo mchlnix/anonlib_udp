@@ -15,6 +15,8 @@ class InitPacketFactoryTest extends TestCase {
 
     private PrivateKey[] privateMixKeys;
 
+    private byte[] channelID;
+
     private byte[][] channelKeys;
 
     private InitPacketFactory factory;
@@ -27,6 +29,8 @@ class InitPacketFactoryTest extends TestCase {
         this.payload = Util.randomBytes(payloadLength);
 
         int mixCount = 3;
+
+        this.channelID = new byte[]{0x01, 0x02};
 
         this.privateMixKeys = new PrivateKey[mixCount];
         PublicKey[] publicMixKeys = new PublicKey[mixCount];
@@ -41,7 +45,7 @@ class InitPacketFactoryTest extends TestCase {
             this.channelKeys[i] = Util.randomBytes(EccGroup713.symmetricKeyLength);
         }
 
-        this.factory = new InitPacketFactory(publicMixKeys);
+        this.factory = new InitPacketFactory(channelID, publicMixKeys);
     }
 
     @DisplayName("Same data after making and processing a InitPacket")
@@ -86,9 +90,9 @@ class InitPacketFactoryTest extends TestCase {
         byte[] channelKeyOnion = new byte[this.channelKeys.length * EccGroup713.symmetricKeyLength];
         byte[] payloadOnion = new byte[100];
 
-        InitPacketFactory.InitPacket packet = new InitPacketFactory.InitPacket(publicKey, channelKeyOnion, payloadOnion);
+        InitPacketFactory.InitPacket packet = new InitPacketFactory.InitPacket(channelID, publicKey, channelKeyOnion, payloadOnion);
         InitPacketFactory.ProcessedInitPacket processedPacket =
-                new InitPacketFactory.ProcessedInitPacket(channelKey, publicKey, channelKeyOnion, payloadOnion);
+                new InitPacketFactory.ProcessedInitPacket(this.channelID, channelKey, publicKey, channelKeyOnion, payloadOnion);
 
         assertEquals(packet, processedPacket);
         assertEquals(processedPacket, packet);

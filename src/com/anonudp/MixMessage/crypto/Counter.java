@@ -22,9 +22,8 @@ public class Counter {
 
     public Counter(byte[] prefix)
     {
+        // todo this only works for 4 Byte numbers?
         this(ByteBuffer.wrap(prefix).getInt(CTR_PREFIX_OFFSET));
-
-        assert prefix.length == CTR_PREFIX_SIZE;
     }
 
     public int getCurrentValue()
