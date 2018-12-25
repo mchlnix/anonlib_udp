@@ -7,13 +7,14 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class Fragment {
+    public static final int DUMMY_PAYLOAD_SIZE = 0;
     public static final int DATA_PAYLOAD_SIZE = 272;
     // TODO: get rid of magic numbers
     public static final int INIT_PAYLOAD_SIZE = DATA_PAYLOAD_SIZE - (29 + 3 * EccGroup713.symmetricKeyLength + 6 - (3-1) * 8);
     static final int ID_SIZE = 2;
     private static final int INDEX_SIZE = 1;
     private static final int HEADER_SIZE = ID_SIZE + INDEX_SIZE;
-    static final int DATA_FRAGMENT_SIZE = HEADER_SIZE + DATA_PAYLOAD_SIZE;
+    public static final int DATA_FRAGMENT_SIZE = HEADER_SIZE + DATA_PAYLOAD_SIZE;
     // TODO: actually calculate
     static final int INIT_FRAGMENT_SIZE = HEADER_SIZE + INIT_PAYLOAD_SIZE;
     static final int SINGLE_FRAGMENT_MESSAGE_ID = 0;
@@ -31,8 +32,13 @@ public class Fragment {
 
     private Padding padding;
 
+    public Fragment()
+    {
+        this(SINGLE_FRAGMENT_MESSAGE_ID, SINGLE_FRAGMENT_FRAGMENT_NUMBER, new byte[0], DUMMY_PAYLOAD_SIZE);
+    }
+
     public Fragment(int message_id, int fragment_number, byte[] payload, int payload_limit) {
-        if (payload_limit != INIT_PAYLOAD_SIZE && payload_limit != DATA_PAYLOAD_SIZE)
+        if (payload_limit != INIT_PAYLOAD_SIZE && payload_limit != DATA_PAYLOAD_SIZE && payload_limit != DUMMY_PAYLOAD_SIZE)
             throw new IllegalArgumentException("Payload limit is not an accepted value. Used Fragment.FRAGMENT_*_PAYLOAD instead.");
 
         this.bytesCached = false;
@@ -117,7 +123,7 @@ public class Fragment {
         return last;
     }
 
-    byte[] getPayload() {
+    public byte[] getPayload() {
         return payload;
     }
 
@@ -129,7 +135,7 @@ public class Fragment {
         return this.padding.getLengthAsBytes();
     }
 
-    byte[] toBytes() throws IOException
+    public byte[] toBytes() throws IOException
     {
         if (! this.bytesCached)
         {
