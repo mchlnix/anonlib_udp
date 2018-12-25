@@ -44,7 +44,7 @@ class CounterTest extends TestCase {
 
         for (int i = 0; i < 2000; ++i)
         {
-            assertEquals(i, counter.getCurrentValue());
+            assertEquals(i, counter.asInt());
 
             counter.count();
         }

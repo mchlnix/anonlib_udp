@@ -26,7 +26,7 @@ public class Counter {
         this(ByteBuffer.wrap(prefix).getInt(CTR_PREFIX_OFFSET));
     }
 
-    public int getCurrentValue()
+    public int asInt()
     {
         return this.currentValue;
     }
@@ -56,7 +56,7 @@ public class Counter {
     public boolean equals(Object obj) {
         if (obj instanceof Counter)
         {
-            return this.currentValue == ((Counter) obj).getCurrentValue();
+            return this.currentValue == ((Counter) obj).asInt();
         }
 
         return super.equals(obj);
