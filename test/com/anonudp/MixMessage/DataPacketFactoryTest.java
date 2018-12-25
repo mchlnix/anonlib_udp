@@ -1,6 +1,9 @@
 package com.anonudp.MixMessage;
 
 import com.anonudp.MixMessage.crypto.EccGroup713;
+import com.anonudp.Packet.DataPacket;
+import com.anonudp.Packet.DataPacketFactory;
+import com.anonudp.Packet.ProcessedDataPacket;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -55,7 +58,7 @@ class DataPacketFactoryTest extends TestCase {
     @DisplayName("Same data after making and processing a DataPacket")
     @Test
     void process() {
-        DataPacketFactory.DataPacket packet = null;
+        DataPacket packet = null;
 
         Fragment dataFragment = new Fragment(1234, 0, this.payload, Fragment.DATA_PAYLOAD_SIZE);
         try {
@@ -83,8 +86,8 @@ class DataPacketFactoryTest extends TestCase {
     {
         byte[] payload = Util.randomBytes(200);
 
-        DataPacketFactory.DataPacket packet = new DataPacketFactory.DataPacket(this.channelID, payload);
-        DataPacketFactory.ProcessedDataPacket processedPacket = new DataPacketFactory.ProcessedDataPacket(this.channelID, payload);
+        DataPacket packet = new DataPacket(this.channelID, payload);
+        ProcessedDataPacket processedPacket = new ProcessedDataPacket(this.channelID, payload);
 
         assertEquals(packet, processedPacket);
         assertEquals(processedPacket, packet);

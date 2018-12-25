@@ -3,6 +3,9 @@ package com.anonudp.MixMessage;
 import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.PrivateKey;
 import com.anonudp.MixMessage.crypto.PublicKey;
+import com.anonudp.Packet.InitPacket;
+import com.anonudp.Packet.InitPacketFactory;
+import com.anonudp.Packet.ProcessedInitPacket;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,7 +54,7 @@ class InitPacketFactoryTest extends TestCase {
     @DisplayName("Same data after making and processing a InitPacket")
     @Test
     void process() {
-        InitPacketFactory.InitPacket packet = null;
+        InitPacket packet = null;
 
         try {
             Fragment initFragment = new Fragment(1234, 0, this.payload, Fragment.INIT_PAYLOAD_SIZE);
@@ -69,7 +72,7 @@ class InitPacketFactoryTest extends TestCase {
             {
                 packet = this.factory.process(packet, this.privateMixKeys[i]);
 
-                assertArrayEquals(this.channelKeys[i], ((InitPacketFactory.ProcessedInitPacket) packet).getChannelKey());
+                assertArrayEquals(this.channelKeys[i], ((ProcessedInitPacket) packet).getChannelKey());
             }
 
             assertArrayEquals(this.payload, new Fragment(packet.getPayloadOnion()).getPayload());
@@ -90,9 +93,9 @@ class InitPacketFactoryTest extends TestCase {
         byte[] channelKeyOnion = new byte[this.channelKeys.length * EccGroup713.symmetricKeyLength];
         byte[] payloadOnion = new byte[100];
 
-        InitPacketFactory.InitPacket packet = new InitPacketFactory.InitPacket(channelID, publicKey, channelKeyOnion, payloadOnion);
-        InitPacketFactory.ProcessedInitPacket processedPacket =
-                new InitPacketFactory.ProcessedInitPacket(this.channelID, channelKey, publicKey, channelKeyOnion, payloadOnion);
+        InitPacket packet = new InitPacket(channelID, publicKey, channelKeyOnion, payloadOnion);
+        ProcessedInitPacket processedPacket =
+                new ProcessedInitPacket(this.channelID, channelKey, publicKey, channelKeyOnion, payloadOnion);
 
         assertEquals(packet, processedPacket);
         assertEquals(processedPacket, packet);
