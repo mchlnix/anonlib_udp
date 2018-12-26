@@ -30,7 +30,7 @@ public class PublicKey
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         bos.write("aes_key:".getBytes());
-        bos.write(this.toBytes());
+        bos.write(this.underlyingValue.getEncoded(false));
 
         bos.close();
 
