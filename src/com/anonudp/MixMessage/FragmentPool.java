@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-class FragmentPool implements Iterator<byte[]> {
+public class FragmentPool implements Iterator<byte[]> {
     private final HashMap<Integer, Message> messages;
 
     public FragmentPool()
@@ -22,7 +22,7 @@ class FragmentPool implements Iterator<byte[]> {
         this.messages.get(message_id).addFragment(fragment);
     }
 
-    public int size()
+    int size()
     {
         return this.messages.size();
     }
@@ -53,7 +53,7 @@ class FragmentPool implements Iterator<byte[]> {
         throw new NoCompleteMessagesException();
     }
 
-    public class NoCompleteMessagesException extends NoSuchElementException
+    class NoCompleteMessagesException extends NoSuchElementException
     {
         NoCompleteMessagesException() {
             super();

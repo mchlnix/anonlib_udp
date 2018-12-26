@@ -1,6 +1,7 @@
 package com.anonudp.MixChannel;
 
 import com.anonudp.MixMessage.Fragment;
+import com.anonudp.MixMessage.FragmentPool;
 import com.anonudp.MixMessage.Util;
 import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.EccGroup713;
@@ -14,16 +15,18 @@ import com.anonudp.Packet.Packet;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Channel {
+public class Channel implements Iterator<byte[]> {
     public static int HIGHEST_ID = Double.valueOf(Math.pow(2, 16) - 1).intValue();
     private static HashMap<Integer, Channel> table = new HashMap<>();
 
@@ -43,6 +46,8 @@ public class Channel {
     private byte[][] channelKeys;
 
     private boolean initialized;
+
+    private FragmentPool fragmentPool;
 
     public Channel(IPv4AndPort source, IPv4AndPort destination, PublicKey[] mixPublicKeys) throws IOException {
         this.source = source;
@@ -69,38 +74,40 @@ public class Channel {
 
         this.initialized = false;
 
+        this.fragmentPool = new FragmentPool();
+
         Channel.table.put(this.id, this);
     }
 
-    public byte[] sendRequest(byte[] udpPayload) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
-        this.requestCounter.count();
+    public byte[][] request(byte[] udpPayload) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
+        ArrayList<byte[]> returnPackets = new ArrayList<>();
 
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        while (udpPayload.length > 0)
+        {
+            this.requestCounter.count();
 
-        bos.write(this.destination.toBytes());
-        bos.write(udpPayload);
+            Fragment fragment = new Fragment(this.requestCounter.asInt(), 0, udpPayload, Fragment.INIT_PAYLOAD_SIZE);
 
-        Fragment fragment = new Fragment(this.requestCounter.asInt(), 0, bos.toByteArray(), Fragment.INIT_PAYLOAD_SIZE);
+            InitPacket packet = this.initFactory.makePacket(this.channelKeys, fragment);
 
-        InitPacket packet = this.initFactory.makePacket(this.channelKeys, fragment);
+            returnPackets.add(this.linkCrypt.encrypt(packet));
 
-        return this.linkCrypt.encrypt(packet);
+            udpPayload = Arrays.copyOf(udpPayload, udpPayload.length - fragment.getPayload().length);
+        }
+
+        return returnPackets.toArray(new byte[0][]);
     }
 
-    public byte[] getResponse(byte[] data) throws IOException, NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException {
+    public void response(byte[] data) throws IOException, NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException {
         Packet plainText = this.linkCrypt.decrypt(data);
-
-        Fragment fragment;
 
         if (plainText.getPacketType() == Packet.TYPE_INIT_RESPONSE) {
             this.initialized = true;
-            fragment = new Fragment();
         }
         else {
-            fragment = new Fragment(plainText.getData());
+            Fragment fragment = new Fragment(plainText.getData());
+            this.fragmentPool.addFragment(fragment);
         }
-
-        return fragment.getPayload();
     }
 
     public boolean isInitialized()
@@ -123,8 +130,20 @@ public class Channel {
         return channelID;
     }
 
-    public static void removeAllChannels()
+    static void removeAllChannels()
     {
         Channel.table.clear();
+    }
+
+    /* Iterator methods */
+
+    @Override
+    public boolean hasNext() {
+        return this.fragmentPool.hasNext();
+    }
+
+    @Override
+    public byte[] next() {
+        return this.fragmentPool.next();
     }
 }
