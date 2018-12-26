@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class InitPacketFactoryTest extends TestCase {
@@ -22,12 +24,16 @@ class InitPacketFactoryTest extends TestCase {
 
     private byte[][] channelKeys;
 
+    private byte[] initPayload;
+
     private InitPacketFactory factory;
 
     @BeforeEach
     protected void setUp()
     {
         int payloadLength = 100;
+
+        this.initPayload = new byte[6];
 
         this.payload = Util.randomBytes(payloadLength);
 
@@ -48,7 +54,7 @@ class InitPacketFactoryTest extends TestCase {
             this.channelKeys[i] = Util.randomBytes(EccGroup713.symmetricKeyLength);
         }
 
-        this.factory = new InitPacketFactory(channelID, publicMixKeys);
+        this.factory = new InitPacketFactory(channelID, initPayload, publicMixKeys);
     }
 
     @DisplayName("Same data after making and processing a InitPacket")
@@ -75,7 +81,11 @@ class InitPacketFactoryTest extends TestCase {
                 assertArrayEquals(this.channelKeys[i], ((ProcessedInitPacket) packet).getChannelKey());
             }
 
-            assertArrayEquals(this.payload, new Fragment(packet.getPayloadOnion()).getPayload());
+            byte[] initSpecific = Arrays.copyOf(packet.getPayloadOnion(), this.initPayload.length);
+            byte[] fragment = Arrays.copyOfRange(packet.getPayloadOnion(), this.initPayload.length, packet.getPayloadOnion().length);
+
+            assertArrayEquals(initPayload, initSpecific);
+            assertArrayEquals(this.payload, new Fragment(fragment).getPayload());
         } catch (Exception e) {
             e.printStackTrace();
             fail();

@@ -21,13 +21,15 @@ import static com.anonudp.MixMessage.crypto.Util.createCTRCipher;
 
 public class InitPacketFactory {
     private byte[] channelID;
+    private byte[] initPayload;
 
     private PublicKey[] publicKeys;
 
 
-    public InitPacketFactory(byte[] channelID, PublicKey[] publicKeys)
+    public InitPacketFactory(byte[] channelID, byte[] initPayload, PublicKey[] publicKeys)
     {
         this.channelID = channelID;
+        this.initPayload = initPayload;
 
         if (publicKeys.length < 1)
             throw new IllegalArgumentException("Was given empty public key list.");
@@ -47,7 +49,7 @@ public class InitPacketFactory {
 
         Cipher cipher = createCTRCipher(symmetricDisposableKey, Cipher.DECRYPT_MODE);
 
-        byte[] processedChannelOnion = cipher.doFinal(packet.getChannelKeyOnion());
+        byte[] processedChannelOnion = cipher.update(packet.getChannelKeyOnion());
 
         // TODO: get rid of magic numbers
         byte[] channelKey = Arrays.copyOf(processedChannelOnion, 16);
@@ -81,18 +83,26 @@ public class InitPacketFactory {
         for (int i = 1; i < this.publicKeys.length; ++i)
         {
             privateMessageKey = privateMessageKey.blind(disposableKeys[i-1]);
+
             disposableKeys[i] = this.publicKeys[i].blind(privateMessageKey);
         }
 
         /* preparing "onions" */
 
         byte[] channelOnion = new byte[EccGroup713.symmetricKeyLength * this.publicKeys.length];
-        byte[] payloadOnion = fragment.toBytes();
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bos.write(this.initPayload);
+        bos.write(fragment.toBytes());
+
+        byte[] payloadOnion = bos.toByteArray();
+
+        bos.close();
 
         /* encrypt "onions" */
 
         Cipher cipher;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bos = new ByteArrayOutputStream();
 
         for (int i = disposableKeys.length - 1; i >= 0; --i)
         {
@@ -101,7 +111,8 @@ public class InitPacketFactory {
             bos.write(channelKeys[i]);
             bos.write(Arrays.copyOf(channelOnion, channelOnion.length - EccGroup713.symmetricKeyLength));
 
-            channelOnion = cipher.doFinal(bos.toByteArray());
+            channelOnion = cipher.update(bos.toByteArray());
+
             payloadOnion = cipher.doFinal(payloadOnion);
 
             bos.reset();
