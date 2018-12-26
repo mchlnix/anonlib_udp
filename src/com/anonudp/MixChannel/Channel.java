@@ -14,10 +14,8 @@ import com.anonudp.Packet.Packet;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -35,8 +33,6 @@ public class Channel {
     private IPv4AndPort source;
     private IPv4AndPort destination;
 
-    private DatagramSocket toMix;
-
     private int id;
     private byte[] idBytes;
 
@@ -48,8 +44,7 @@ public class Channel {
 
     private boolean initialized;
 
-    public Channel(IPv4AndPort source, IPv4AndPort destination, PublicKey[] mixPublicKeys)
-    {
+    public Channel(IPv4AndPort source, IPv4AndPort destination, PublicKey[] mixPublicKeys) throws IOException {
         this.source = source;
         this.destination = destination;
 
@@ -66,7 +61,7 @@ public class Channel {
         this.idBytes[0] = (byte) (this.id & 0xFF00);
         this.idBytes[1] = (byte) (this.id & 0x00FF);
 
-        this.initFactory = new InitPacketFactory(this.idBytes, this.mixKeys);
+        this.initFactory = new InitPacketFactory(this.idBytes, this.destination.toBytes(), this.mixKeys);
         this.dataFactory = new DataPacketFactory(this.idBytes, this.channelKeys);
 
         this.linkCrypt = new LinkEncryption(new byte[EccGroup713.symmetricKeyLength]);
@@ -77,34 +72,25 @@ public class Channel {
         Channel.table.put(this.id, this);
     }
 
-    public void connect(IPv4AndPort firstMix) throws SocketException {
-        this.toMix = new DatagramSocket();
-
-        this.toMix.connect(firstMix.getHost(), firstMix.getPort());
-    }
-
-    public void sendRequest(byte[] udpPayload) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
+    public byte[] sendRequest(byte[] udpPayload) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
         this.requestCounter.count();
 
-        Fragment fragment = new Fragment(this.requestCounter.asInt(), 0, udpPayload, Fragment.INIT_PAYLOAD_SIZE);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        bos.write(this.destination.toBytes());
+        bos.write(udpPayload);
+
+        Fragment fragment = new Fragment(this.requestCounter.asInt(), 0, bos.toByteArray(), Fragment.INIT_PAYLOAD_SIZE);
 
         InitPacket packet = this.initFactory.makePacket(this.channelKeys, fragment);
 
-        byte[] data = this.linkCrypt.encrypt(packet);
-
-        this.toMix.send(new DatagramPacket(data, data.length));
+        return this.linkCrypt.encrypt(packet);
     }
 
-    public byte[] getResponse() throws IOException, NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException {
-        byte[] buffer = new byte[1000];
+    public byte[] getResponse(byte[] data) throws IOException, NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException {
+        Packet plainText = this.linkCrypt.decrypt(data);
 
-        DatagramPacket packet = new DatagramPacket(buffer, 1000);
-
-        this.toMix.receive(packet);
-
-        Packet plainText = this.linkCrypt.decrypt(packet.getData());
-
-        Fragment fragment = null;
+        Fragment fragment;
 
         if (plainText.getPacketType() == Packet.TYPE_INIT_RESPONSE) {
             this.initialized = true;

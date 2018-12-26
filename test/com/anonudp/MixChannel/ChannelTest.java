@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 
 class ChannelTest extends TestCase {
@@ -30,7 +31,7 @@ class ChannelTest extends TestCase {
 
     @DisplayName("Random ids do not repeat")
     @Test
-    void nonRepeatingIDs() {
+    void nonRepeatingIDs() throws IOException {
         Channel.removeAllChannels();
 
         for (int i = 0; i < 1000; ++i)
@@ -41,8 +42,7 @@ class ChannelTest extends TestCase {
 
     @DisplayName("IDs throw exception when running out")
     @Test
-    void noMoreExceptions()
-    {
+    void noMoreExceptions() throws IOException {
         Channel.removeAllChannels();
 
         for (int i = 0; i < Channel.HIGHEST_ID; ++i)
