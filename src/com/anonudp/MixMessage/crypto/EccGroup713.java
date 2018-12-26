@@ -69,7 +69,16 @@ public class EccGroup713 {
 
     private static BigInteger makeExponentFromBytes(byte[] bytes)
     {
-        BigInteger exponent = new BigInteger(bytes);
+        /*
+        Java implementation of byte to BigInteger regards the first bit as a sign bit.
+        Python implementation does not, so we prepend a 0 byte to force Java into producing
+        a positive BigInteger.
+         */
+        byte[] fixedBytes = new byte[1 + bytes.length];
+
+        System.arraycopy(bytes, 0, fixedBytes, 1, bytes.length);
+
+        BigInteger exponent = new BigInteger(fixedBytes);
 
         return exponent.mod(EccGroup713.order);
     }
