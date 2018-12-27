@@ -3,7 +3,7 @@ package com.anonudp.MixMessage;
 import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.PublicKey;
-import com.anonudp.Packet.InitPacket;
+import com.anonudp.MixPacket.InitPacket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

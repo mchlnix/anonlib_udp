@@ -1,8 +1,8 @@
-package com.anonudp.Packet;
+package com.anonudp.MixPacket;
 
 import java.io.IOException;
 
-public interface Packet {
+public interface IPacket {
     byte TYPE_DATA = 0x01;
     byte TYPE_INIT = 0x02;
     byte TYPE_INIT_RESPONSE = 0x03;

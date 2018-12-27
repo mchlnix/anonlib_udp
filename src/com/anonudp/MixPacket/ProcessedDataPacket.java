@@ -1,4 +1,4 @@
-package com.anonudp.Packet;
+package com.anonudp.MixPacket;
 
 public class ProcessedDataPacket extends DataPacket
 {

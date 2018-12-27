@@ -1,9 +1,9 @@
 package com.anonudp.MixMessage;
 
 import com.anonudp.MixMessage.crypto.EccGroup713;
-import com.anonudp.Packet.DataPacket;
-import com.anonudp.Packet.DataPacketFactory;
-import com.anonudp.Packet.ProcessedDataPacket;
+import com.anonudp.MixPacket.DataPacket;
+import com.anonudp.MixPacket.DataPacketFactory;
+import com.anonudp.MixPacket.ProcessedDataPacket;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

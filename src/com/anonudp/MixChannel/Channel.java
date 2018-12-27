@@ -7,9 +7,9 @@ import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.LinkEncryption;
 import com.anonudp.MixMessage.crypto.PublicKey;
-import com.anonudp.Packet.DataPacketFactory;
-import com.anonudp.Packet.InitPacketFactory;
-import com.anonudp.Packet.Packet;
+import com.anonudp.MixPacket.DataPacketFactory;
+import com.anonudp.MixPacket.InitPacketFactory;
+import com.anonudp.MixPacket.IPacket;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -76,7 +76,7 @@ public class Channel implements Iterator<byte[]> {
 
             Fragment fragment;
 
-            Packet packet;
+            IPacket packet;
 
             if (this.initialized) {
                 fragment = new Fragment(this.requestCounter.asInt(), 0, udpPayload, Fragment.DATA_PAYLOAD_SIZE);
@@ -97,9 +97,9 @@ public class Channel implements Iterator<byte[]> {
     }
 
     public void response(byte[] data) throws IOException, NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException {
-        Packet plainText = this.linkCrypt.decrypt(data);
+        IPacket plainText = this.linkCrypt.decrypt(data);
 
-        if (plainText.getPacketType() == Packet.TYPE_INIT_RESPONSE) {
+        if (plainText.getPacketType() == IPacket.TYPE_INIT_RESPONSE) {
             this.initialized = true;
         }
         else {

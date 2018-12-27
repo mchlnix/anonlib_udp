@@ -1,4 +1,4 @@
-package com.anonudp.Packet;
+package com.anonudp.MixPacket;
 
 import com.anonudp.MixChannel.IPv4AndPort;
 import com.anonudp.MixMessage.Util;
@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 import static com.anonudp.Constants.MIX_SERVER_COUNT;
 
-public class InitPacket implements Packet
+public class InitPacket implements IPacket
 {
     public static final int PAYLOAD_SIZE = IPv4AndPort.SIZE;
     private final byte[] channelID;
@@ -73,7 +73,7 @@ public class InitPacket implements Packet
 
     @Override
     public byte getPacketType() {
-        return Packet.TYPE_INIT;
+        return IPacket.TYPE_INIT;
     }
 
     @Override

@@ -2,9 +2,9 @@ package com.anonudp.MixMessage.crypto;
 
 import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.Util;
-import com.anonudp.Packet.DataPacket;
-import com.anonudp.Packet.DataPacketFactory;
-import com.anonudp.Packet.Packet;
+import com.anonudp.MixPacket.DataPacket;
+import com.anonudp.MixPacket.DataPacketFactory;
+import com.anonudp.MixPacket.IPacket;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ class LinkEncryptionTest extends TestCase {
 
         byte[] linkEncryptedPacket = linkCrypt.encrypt(packet);
 
-        Packet decryptedPacket = linkCrypt.decrypt(linkEncryptedPacket);
+        IPacket decryptedPacket = linkCrypt.decrypt(linkEncryptedPacket);
 
         assertEquals(packet, decryptedPacket);
     }

@@ -1,9 +1,9 @@
 package com.anonudp.MixMessage.crypto;
 
-import com.anonudp.Packet.DataPacket;
-import com.anonudp.Packet.InitPacket;
-import com.anonudp.Packet.InitResponse;
-import com.anonudp.Packet.Packet;
+import com.anonudp.MixPacket.DataPacket;
+import com.anonudp.MixPacket.InitPacket;
+import com.anonudp.MixPacket.InitResponse;
+import com.anonudp.MixPacket.IPacket;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -29,7 +29,7 @@ public class LinkEncryption {
         this.counter = new Counter();
     }
 
-    public byte[] encrypt(Packet packet) throws NoSuchProviderException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, BadPaddingException, IllegalBlockSizeException {
+    public byte[] encrypt(IPacket packet) throws NoSuchProviderException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, BadPaddingException, IllegalBlockSizeException {
         this.counter.count();
 
         Cipher gcm = Util.createGCM(this.key, this.counter.asIV(), Cipher.ENCRYPT_MODE);
@@ -49,7 +49,7 @@ public class LinkEncryption {
         return bos.toByteArray();
     }
 
-    public Packet decrypt(byte[] packetBytes) throws NoSuchProviderException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, IOException {
+    public IPacket decrypt(byte[] packetBytes) throws NoSuchProviderException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, IOException {
         Counter linkPrefix = new Counter(packetBytes);
 
         Cipher gcm = Util.createGCM(this.key, linkPrefix.asIV(), Cipher.DECRYPT_MODE);
@@ -66,9 +66,9 @@ public class LinkEncryption {
         byte[] messagePrefix = Arrays.copyOfRange(plainText, 2, 2 + Counter.CTR_PREFIX_SIZE);
         byte messageType = plainText[2 + Counter.CTR_PREFIX_SIZE];
 
-        Packet returnPacket = null;
+        IPacket returnPacket = null;
 
-        if (messageType == Packet.TYPE_DATA) {
+        if (messageType == IPacket.TYPE_DATA) {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
             bos.write(messagePrefix);
@@ -76,9 +76,9 @@ public class LinkEncryption {
 
             returnPacket = new DataPacket(channelID, bos.toByteArray());
         }
-        else if (messageType == Packet.TYPE_INIT)
+        else if (messageType == IPacket.TYPE_INIT)
             returnPacket = new InitPacket(channelID, payload);
-        else if (messageType == Packet.TYPE_INIT_RESPONSE)
+        else if (messageType == IPacket.TYPE_INIT_RESPONSE)
             returnPacket = new InitResponse(channelID, payload);
 
         return returnPacket;

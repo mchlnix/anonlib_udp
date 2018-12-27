@@ -1,9 +1,9 @@
-package com.anonudp.Packet;
+package com.anonudp.MixPacket;
 
 import com.anonudp.MixMessage.Util;
 import com.anonudp.MixMessage.crypto.EccGroup713;
 
-public class InitResponse implements Packet {
+public class InitResponse implements IPacket {
     private final byte[] channelID;
     private final byte[] data;
 
@@ -18,7 +18,7 @@ public class InitResponse implements Packet {
     }
     @Override
     public byte getPacketType() {
-        return Packet.TYPE_INIT_RESPONSE;
+        return IPacket.TYPE_INIT_RESPONSE;
     }
 
     @Override

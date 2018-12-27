@@ -1,4 +1,4 @@
-package com.anonudp.Packet;
+package com.anonudp.MixPacket;
 
 import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.crypto.Counter;

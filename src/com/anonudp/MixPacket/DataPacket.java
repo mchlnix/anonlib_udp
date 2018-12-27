@@ -1,10 +1,10 @@
-package com.anonudp.Packet;
+package com.anonudp.MixPacket;
 
 import com.anonudp.MixMessage.crypto.Counter;
 
 import java.util.Arrays;
 
-public class DataPacket implements Packet
+public class DataPacket implements IPacket
 {
     private final byte[] channelID;
 
@@ -51,7 +51,7 @@ public class DataPacket implements Packet
 
     @Override
     public byte getPacketType() {
-        return Packet.TYPE_DATA;
+        return IPacket.TYPE_DATA;
     }
 
     @Override
