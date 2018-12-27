@@ -6,9 +6,9 @@ import java.util.Arrays;
 
 public class DataPacket implements Packet
 {
-    private byte[] channelID;
+    private final byte[] channelID;
 
-    private byte[] byteArray;
+    private final byte[] byteArray;
     private byte[] ctrPrefix;
     private byte[] encryptedData;
 

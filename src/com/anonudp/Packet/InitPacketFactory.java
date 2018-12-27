@@ -20,8 +20,8 @@ import java.util.Arrays;
 import static com.anonudp.MixMessage.crypto.Util.createCTRCipher;
 
 public class InitPacketFactory {
-    private byte[] channelID;
-    private byte[] initPayload;
+    private final byte[] channelID;
+    private final byte[] initPayload;
 
     private PublicKey[] publicKeys;
 

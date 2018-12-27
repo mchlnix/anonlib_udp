@@ -17,7 +17,7 @@ import java.security.NoSuchProviderException;
 public class DataPacketFactory {
     private final Counter counter;
 
-    private byte[] channelID;
+    private final byte[] channelID;
 
     private final byte[][] channelKeys;
     private final int mixCount;

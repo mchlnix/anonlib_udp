@@ -15,7 +15,7 @@ class PrivateKeyTest extends TestCase {
         int iterations = 100;
 
         PrivateKey previousKey = new PrivateKey();
-        PrivateKey thisKey = null;
+        PrivateKey thisKey;
 
         for (int i = 0; i < iterations; ++i)
         {

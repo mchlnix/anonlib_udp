@@ -20,8 +20,8 @@ import java.util.Arrays;
 import static com.anonudp.MixMessage.Util.randomBytes;
 
 public class LinkEncryption {
-    private byte[] key;
-    private Counter counter;
+    private final byte[] key;
+    private final Counter counter;
 
     public LinkEncryption(byte[] linkKey)
     {

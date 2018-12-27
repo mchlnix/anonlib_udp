@@ -4,10 +4,10 @@ import com.anonudp.MixMessage.Util;
 import com.anonudp.MixMessage.crypto.EccGroup713;
 
 public class InitResponse implements Packet {
-    private byte[] channelID;
-    private byte[] data;
+    private final byte[] channelID;
+    private final byte[] data;
 
-    private byte[] prefix;
+    private final byte[] prefix;
 
     public InitResponse(byte[] channelID, byte[] data)
     {

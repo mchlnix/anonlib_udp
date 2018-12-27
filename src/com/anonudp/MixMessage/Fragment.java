@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class Fragment {
-    public static final int DUMMY_PAYLOAD_SIZE = 0;
+    private static final int DUMMY_PAYLOAD_SIZE = 0;
     public static final int DATA_PAYLOAD_SIZE = 272;
     // TODO: get rid of magic numbers
     public static final int INIT_PAYLOAD_SIZE = DATA_PAYLOAD_SIZE - (29 + 3 * EccGroup713.symmetricKeyLength + 6 - (3-1) * 8);

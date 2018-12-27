@@ -8,7 +8,6 @@ import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.LinkEncryption;
 import com.anonudp.MixMessage.crypto.PublicKey;
 import com.anonudp.Packet.DataPacketFactory;
-import com.anonudp.Packet.InitPacket;
 import com.anonudp.Packet.InitPacketFactory;
 import com.anonudp.Packet.Packet;
 
@@ -27,47 +26,35 @@ import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Channel implements Iterator<byte[]> {
-    public static int HIGHEST_ID = Double.valueOf(Math.pow(2, 16) - 1).intValue();
-    private static HashMap<Integer, Channel> table = new HashMap<>();
+    static final int HIGHEST_ID = Double.valueOf(Math.pow(2, 16) - 1).intValue();
+    private static final HashMap<Integer, Channel> table = new HashMap<>();
 
     private InitPacketFactory initFactory;
     private DataPacketFactory dataFactory;
 
-    private IPv4AndPort source;
-    private IPv4AndPort destination;
-
-    private int id;
-    private byte[] idBytes;
-
     private LinkEncryption linkCrypt;
     private Counter requestCounter;
 
-    private PublicKey[] mixKeys;
-    private byte[][] channelKeys;
+    private final byte[][] channelKeys;
 
     private boolean initialized;
 
     private FragmentPool fragmentPool;
 
     public Channel(IPv4AndPort source, IPv4AndPort destination, PublicKey[] mixPublicKeys) throws IOException {
-        this.source = source;
-        this.destination = destination;
+        this.channelKeys = new byte[mixPublicKeys.length][EccGroup713.symmetricKeyLength];
 
-        this.mixKeys = mixPublicKeys;
-
-        this.channelKeys = new byte[this.mixKeys.length][EccGroup713.symmetricKeyLength];
-
-        for(int i = 0; i < this.mixKeys.length; ++i)
+        for(int i = 0; i < mixPublicKeys.length; ++i)
             this.channelKeys[i] = Util.randomBytes(EccGroup713.symmetricKeyLength);
 
-        this.id = Channel.randomID();
-        this.idBytes = new byte[2];
+        int id = Channel.randomID();
+        byte[] idBytes = new byte[2];
 
-        this.idBytes[0] = (byte) (this.id & 0xFF00);
-        this.idBytes[1] = (byte) (this.id & 0x00FF);
+        idBytes[0] = (byte) (id & 0xFF00);
+        idBytes[1] = (byte) (id & 0x00FF);
 
-        this.initFactory = new InitPacketFactory(this.idBytes, this.destination.toBytes(), this.mixKeys);
-        this.dataFactory = new DataPacketFactory(this.idBytes, this.channelKeys);
+        this.initFactory = new InitPacketFactory(idBytes, destination.toBytes(), mixPublicKeys);
+        this.dataFactory = new DataPacketFactory(idBytes, this.channelKeys);
 
         this.linkCrypt = new LinkEncryption(new byte[EccGroup713.symmetricKeyLength]);
         this.requestCounter = new Counter();
@@ -76,7 +63,7 @@ public class Channel implements Iterator<byte[]> {
 
         this.fragmentPool = new FragmentPool();
 
-        Channel.table.put(this.id, this);
+        Channel.table.put(id, this);
     }
 
     public byte[][] request(byte[] udpPayload) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
@@ -86,9 +73,19 @@ public class Channel implements Iterator<byte[]> {
         {
             this.requestCounter.count();
 
-            Fragment fragment = new Fragment(this.requestCounter.asInt(), 0, udpPayload, Fragment.INIT_PAYLOAD_SIZE);
+            Fragment fragment;
 
-            InitPacket packet = this.initFactory.makePacket(this.channelKeys, fragment);
+            Packet packet;
+
+            if (this.initialized) {
+                fragment = new Fragment(this.requestCounter.asInt(), 0, udpPayload, Fragment.DATA_PAYLOAD_SIZE);
+                packet = this.dataFactory.makePacket(fragment);
+            }
+            else
+            {
+                fragment = new Fragment(this.requestCounter.asInt(), 0, udpPayload, Fragment.INIT_PAYLOAD_SIZE);
+                packet = this.initFactory.makePacket(this.channelKeys, fragment);
+            }
 
             returnPackets.add(this.linkCrypt.encrypt(packet));
 
@@ -108,11 +105,6 @@ public class Channel implements Iterator<byte[]> {
             Fragment fragment = new Fragment(plainText.getData());
             this.fragmentPool.addFragment(fragment);
         }
-    }
-
-    public boolean isInitialized()
-    {
-        return this.initialized;
     }
 
     private static int randomID()

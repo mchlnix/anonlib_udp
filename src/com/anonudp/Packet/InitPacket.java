@@ -48,7 +48,7 @@ public class InitPacket implements Packet
         return payloadOnion;
     }
 
-    public byte[] toBytes() throws IOException {
+    private byte[] toBytes() throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         bos.write(publicKey.toBytes());
