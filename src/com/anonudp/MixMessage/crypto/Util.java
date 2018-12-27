@@ -25,7 +25,7 @@ public class Util {
     }
 
     public static Cipher createCTRCipher(byte[] symmetricKey, int mode) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
-        return createCTRCipher(symmetricKey, new byte[EccGroup713.symmetricKeyLength], mode);
+        return createCTRCipher(symmetricKey, new byte[EccGroup713.SYMMETRIC_KEY_LENGTH], mode);
     }
 
     public static Cipher createGCM(byte[] symmetricKey, byte[] iv, int mode) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidKeyException {
@@ -40,6 +40,6 @@ public class Util {
     }
 
     public static Cipher createGCM(byte[] symmetricKey, int mode) throws NoSuchProviderException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException {
-        return createGCM(symmetricKey, new byte[EccGroup713.symmetricKeyLength], mode);
+        return createGCM(symmetricKey, new byte[EccGroup713.SYMMETRIC_KEY_LENGTH], mode);
     }
 }

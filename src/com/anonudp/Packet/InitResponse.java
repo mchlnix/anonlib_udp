@@ -14,7 +14,7 @@ public class InitResponse implements Packet {
         this.channelID = channelID;
         this.data = data;
 
-        this.prefix = Util.randomBytes(EccGroup713.symmetricKeyLength);
+        this.prefix = Util.randomBytes(EccGroup713.SYMMETRIC_KEY_LENGTH);
     }
     @Override
     public byte getPacketType() {

@@ -30,11 +30,11 @@ class DataPacketFactoryTest extends TestCase {
 
         this.channelID = new byte[]{0x01, 0x02};
 
-        this.channelKeys = new byte[mixCount][EccGroup713.symmetricKeyLength];
+        this.channelKeys = new byte[mixCount][EccGroup713.SYMMETRIC_KEY_LENGTH];
 
         for (int i = 0; i < channelKeys.length; ++i)
         {
-            this.channelKeys[i] = Util.randomBytes(EccGroup713.symmetricKeyLength);
+            this.channelKeys[i] = Util.randomBytes(EccGroup713.SYMMETRIC_KEY_LENGTH);
         }
 
         this.factory = new DataPacketFactory(this.channelID, this.channelKeys);

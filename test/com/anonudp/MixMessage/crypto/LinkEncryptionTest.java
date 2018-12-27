@@ -23,15 +23,15 @@ class LinkEncryptionTest extends TestCase {
     @DisplayName("Checks interoperability of encrypt and decrypt")
     @Test
     void enAndDecrypt() throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, NoSuchProviderException, InvalidKeyException {
-        byte[] symmetricKey = Util.randomBytes(EccGroup713.symmetricKeyLength);
+        byte[] symmetricKey = Util.randomBytes(EccGroup713.SYMMETRIC_KEY_LENGTH);
 
         byte[] channelID = new byte[]{0x01, 0x02};
 
-        byte[][] channelKeys = new byte[3][EccGroup713.symmetricKeyLength];
+        byte[][] channelKeys = new byte[3][EccGroup713.SYMMETRIC_KEY_LENGTH];
 
         for (int i = 0; i < 3; ++i)
         {
-            channelKeys[i] = Util.randomBytes(EccGroup713.symmetricKeyLength);
+            channelKeys[i] = Util.randomBytes(EccGroup713.SYMMETRIC_KEY_LENGTH);
         }
 
         byte[] payload = Util.randomBytes(500);

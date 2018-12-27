@@ -44,14 +44,14 @@ class InitPacketFactoryTest extends TestCase {
         this.privateMixKeys = new PrivateKey[mixCount];
         PublicKey[] publicMixKeys = new PublicKey[mixCount];
 
-        this.channelKeys = new byte[mixCount][EccGroup713.symmetricKeyLength];
+        this.channelKeys = new byte[mixCount][EccGroup713.SYMMETRIC_KEY_LENGTH];
 
         for (int i = 0; i < publicMixKeys.length; ++i)
         {
             this.privateMixKeys[i] = new PrivateKey();
             publicMixKeys[i] = new PublicKey(this.privateMixKeys[i]);
 
-            this.channelKeys[i] = Util.randomBytes(EccGroup713.symmetricKeyLength);
+            this.channelKeys[i] = Util.randomBytes(EccGroup713.SYMMETRIC_KEY_LENGTH);
         }
 
         this.factory = new InitPacketFactory(channelID, initPayload, publicMixKeys);
@@ -99,8 +99,8 @@ class InitPacketFactoryTest extends TestCase {
         PrivateKey privateKey = new PrivateKey();
         PublicKey publicKey = new PublicKey(privateKey);
 
-        byte[] channelKey = new byte[EccGroup713.symmetricKeyLength];
-        byte[] channelKeyOnion = new byte[this.channelKeys.length * EccGroup713.symmetricKeyLength];
+        byte[] channelKey = new byte[EccGroup713.SYMMETRIC_KEY_LENGTH];
+        byte[] channelKeyOnion = new byte[this.channelKeys.length * EccGroup713.SYMMETRIC_KEY_LENGTH];
         byte[] payloadOnion = new byte[100];
 
         InitPacket packet = new InitPacket(channelID, publicKey, channelKeyOnion, payloadOnion);

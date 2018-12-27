@@ -89,7 +89,7 @@ public class InitPacketFactory {
 
         /* preparing "onions" */
 
-        byte[] channelOnion = new byte[EccGroup713.symmetricKeyLength * this.publicKeys.length];
+        byte[] channelOnion = new byte[EccGroup713.SYMMETRIC_KEY_LENGTH * this.publicKeys.length];
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         bos.write(this.initPayload);
@@ -109,7 +109,7 @@ public class InitPacketFactory {
             cipher = createCTRCipher(disposableKeys[i].toSymmetricKey(), Cipher.ENCRYPT_MODE);
 
             bos.write(channelKeys[i]);
-            bos.write(Arrays.copyOf(channelOnion, channelOnion.length - EccGroup713.symmetricKeyLength));
+            bos.write(Arrays.copyOf(channelOnion, channelOnion.length - EccGroup713.SYMMETRIC_KEY_LENGTH));
 
             channelOnion = cipher.update(bos.toByteArray());
 

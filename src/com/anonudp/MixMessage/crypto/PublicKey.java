@@ -12,6 +12,8 @@ import java.util.Arrays;
 
 public class PublicKey
 {
+    public static final int SIZE = 29; // bytes
+
     private final ECPoint underlyingValue;
 
     public PublicKey(PrivateKey privateKey)
@@ -36,7 +38,7 @@ public class PublicKey
 
         byte[] hash = digest.digest(bos.toByteArray());
 
-        return Arrays.copyOf(hash, EccGroup713.symmetricKeyLength);
+        return Arrays.copyOf(hash, EccGroup713.SYMMETRIC_KEY_LENGTH);
     }
 
     public PublicKey blind(PrivateKey privateKey)

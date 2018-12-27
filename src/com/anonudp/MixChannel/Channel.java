@@ -26,7 +26,8 @@ import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Channel implements Iterator<byte[]> {
-    static final int HIGHEST_ID = Double.valueOf(Math.pow(2, 16) - 1).intValue();
+    private static final int ID_SIZE = 2; // byte
+    static final int HIGHEST_ID = Double.valueOf(Math.pow(2, 8 * ID_SIZE) - 1).intValue();
     private static final HashMap<Integer, Channel> table = new HashMap<>();
 
     private InitPacketFactory initFactory;
@@ -42,10 +43,10 @@ public class Channel implements Iterator<byte[]> {
     private FragmentPool fragmentPool;
 
     public Channel(IPv4AndPort source, IPv4AndPort destination, PublicKey[] mixPublicKeys) throws IOException {
-        this.channelKeys = new byte[mixPublicKeys.length][EccGroup713.symmetricKeyLength];
+        this.channelKeys = new byte[mixPublicKeys.length][EccGroup713.SYMMETRIC_KEY_LENGTH];
 
         for(int i = 0; i < mixPublicKeys.length; ++i)
-            this.channelKeys[i] = Util.randomBytes(EccGroup713.symmetricKeyLength);
+            this.channelKeys[i] = Util.randomBytes(EccGroup713.SYMMETRIC_KEY_LENGTH);
 
         int id = Channel.randomID();
         byte[] idBytes = new byte[2];
@@ -56,7 +57,7 @@ public class Channel implements Iterator<byte[]> {
         this.initFactory = new InitPacketFactory(idBytes, destination.toBytes(), mixPublicKeys);
         this.dataFactory = new DataPacketFactory(idBytes, this.channelKeys);
 
-        this.linkCrypt = new LinkEncryption(new byte[EccGroup713.symmetricKeyLength]);
+        this.linkCrypt = new LinkEncryption(new byte[EccGroup713.SYMMETRIC_KEY_LENGTH]);
         this.requestCounter = new Counter();
 
         this.initialized = false;

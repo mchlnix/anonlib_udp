@@ -1,5 +1,6 @@
 package com.anonudp.Packet;
 
+import com.anonudp.MixChannel.IPv4AndPort;
 import com.anonudp.MixMessage.Util;
 import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.EccGroup713;
@@ -9,8 +10,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static com.anonudp.Constants.MIX_SERVER_COUNT;
+
 public class InitPacket implements Packet
 {
+    public static final int PAYLOAD_SIZE = IPv4AndPort.SIZE;
     private final byte[] channelID;
 
     private final PublicKey publicKey;
@@ -28,12 +32,19 @@ public class InitPacket implements Packet
 
     public InitPacket(byte[] channelID, byte[] data)
     {
-        // todo make constants
         this.channelID = channelID;
 
-        this.publicKey = PublicKey.fromBytes(Arrays.copyOf(data, 29));
-        this.channelKeyOnion = Arrays.copyOfRange(data, 29, 29 + EccGroup713.symmetricKeyLength * 3);
-        this.payloadOnion = Arrays.copyOfRange(data, 29 + EccGroup713.symmetricKeyLength * 3, data.length);
+        int offset = 0;
+
+        this.publicKey = PublicKey.fromBytes(Arrays.copyOf(data, PublicKey.SIZE));
+
+        offset += PublicKey.SIZE;
+
+        this.channelKeyOnion = Arrays.copyOfRange(data, offset, offset + EccGroup713.SYMMETRIC_KEY_LENGTH * MIX_SERVER_COUNT);
+
+        offset += EccGroup713.SYMMETRIC_KEY_LENGTH * MIX_SERVER_COUNT;
+
+        this.payloadOnion = Arrays.copyOfRange(data, offset, data.length);
     }
 
     PublicKey getPublicKey() {

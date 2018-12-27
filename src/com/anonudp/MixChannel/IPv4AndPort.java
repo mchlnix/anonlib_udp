@@ -6,6 +6,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 public class IPv4AndPort {
+    private static final int IP_SIZE = 4;
+    private static final int PORT_SIZE = 2;
+
+    public static final int SIZE = IP_SIZE + PORT_SIZE;
+
     private InetAddress host;
     private int port;
 

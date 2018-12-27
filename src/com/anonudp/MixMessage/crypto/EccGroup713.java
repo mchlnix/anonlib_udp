@@ -18,7 +18,7 @@ public class EccGroup713 {
     private static final ECPoint generator = spec.getG();
     private static final BigInteger order = spec.getCurve().getOrder();
 
-    public static final int symmetricKeyLength = 16;
+    public static final int SYMMETRIC_KEY_LENGTH = 16;
 
     static
     {
@@ -53,9 +53,9 @@ public class EccGroup713 {
 
     private static byte[] deriveKey(byte[] symmetricKey, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         assert symmetricKey.length == iv.length;
-        assert symmetricKey.length == EccGroup713.symmetricKeyLength;
+        assert symmetricKey.length == EccGroup713.SYMMETRIC_KEY_LENGTH;
 
-        byte[] message = new byte[EccGroup713.symmetricKeyLength];
+        byte[] message = new byte[EccGroup713.SYMMETRIC_KEY_LENGTH];
 
         Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "BC");
 

@@ -51,7 +51,7 @@ class EccGroup713Test extends TestCase {
     @DisplayName("PublicKey from symmetric key is deterministic")
     @Test
     void hb1() {
-        int arrayLength = EccGroup713.symmetricKeyLength;
+        int arrayLength = EccGroup713.SYMMETRIC_KEY_LENGTH;
         byte[] randomBytes = randomBytes(arrayLength);
 
         assertFalse(Arrays.equals(new byte[arrayLength], randomBytes));
@@ -69,7 +69,7 @@ class EccGroup713Test extends TestCase {
     @DisplayName("PublicKey from symmetric key returns different results")
     @Test
     void hb2() {
-        int arrayLength = EccGroup713.symmetricKeyLength;
+        int arrayLength = EccGroup713.SYMMETRIC_KEY_LENGTH;
         byte[] randomBytes = randomBytes(arrayLength);
 
         assertFalse(Arrays.equals(new byte[arrayLength], randomBytes));

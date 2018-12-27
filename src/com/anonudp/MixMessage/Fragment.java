@@ -1,26 +1,35 @@
 package com.anonudp.MixMessage;
 
+import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.EccGroup713;
+import com.anonudp.MixMessage.crypto.PublicKey;
+import com.anonudp.Packet.InitPacket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static com.anonudp.Constants.MIX_SERVER_COUNT;
+
 public class Fragment {
+    private static final int DATA_OVERHEAD = (MIX_SERVER_COUNT - 1) * Counter.CTR_PREFIX_SIZE;
+    private static final int INIT_OVERHEAD = PublicKey.SIZE + MIX_SERVER_COUNT * EccGroup713.SYMMETRIC_KEY_LENGTH + InitPacket.PAYLOAD_SIZE;
+
     private static final int DUMMY_PAYLOAD_SIZE = 0;
     public static final int DATA_PAYLOAD_SIZE = 272;
-    // TODO: get rid of magic numbers
-    public static final int INIT_PAYLOAD_SIZE = DATA_PAYLOAD_SIZE - (29 + 3 * EccGroup713.symmetricKeyLength + 6 - (3-1) * 8);
+    public static final int INIT_PAYLOAD_SIZE = DATA_PAYLOAD_SIZE - (INIT_OVERHEAD - DATA_OVERHEAD);
+
     static final int ID_SIZE = 2;
     private static final int INDEX_SIZE = 1;
     private static final int HEADER_SIZE = ID_SIZE + INDEX_SIZE;
+
     public static final int DATA_FRAGMENT_SIZE = HEADER_SIZE + DATA_PAYLOAD_SIZE;
-    // TODO: actually calculate
     static final int INIT_FRAGMENT_SIZE = HEADER_SIZE + INIT_PAYLOAD_SIZE;
     static final int SINGLE_FRAGMENT_MESSAGE_ID = 0;
     static final int SINGLE_FRAGMENT_FRAGMENT_NUMBER = 0;
-    private static final int HAS_PADDING_BIT = 0x01;
-    private static final int LAST_FRAGMENT_BIT = 0x02;
+
+    private static final int BIT_HAS_PADDING = 0x01;
+    private static final int BIT_LAST_FRAGMENT = 0x02;
 
     private int message_id;
     private int fragment_number;
@@ -79,12 +88,12 @@ public class Fragment {
         this.message_id += fragment[current_offset];
         this.message_id >>= 2;
 
-        this.last = (fragment[current_offset] & LAST_FRAGMENT_BIT) > 0;
+        this.last = (fragment[current_offset] & BIT_LAST_FRAGMENT) > 0;
 
         if (message_id == 0 && !last)
             throw new IllegalArgumentException("Message should only contain one fragment, but the given fragment was not the last.");
 
-        boolean has_padding = (fragment[current_offset] & HAS_PADDING_BIT) > 0;
+        boolean has_padding = (fragment[current_offset] & BIT_HAS_PADDING) > 0;
 
         ++current_offset;
 
@@ -146,10 +155,10 @@ public class Fragment {
             message_id_and_flags <<= 2;
 
             if (this.last)
-                message_id_and_flags |= LAST_FRAGMENT_BIT;
+                message_id_and_flags |= BIT_LAST_FRAGMENT;
 
             if (this.getPadding_length() > 0)
-                message_id_and_flags |= HAS_PADDING_BIT;
+                message_id_and_flags |= BIT_HAS_PADDING;
 
             bos.write(message_id_and_flags >> 8 & 0xFF);
             bos.write(message_id_and_flags & 0xFF);
