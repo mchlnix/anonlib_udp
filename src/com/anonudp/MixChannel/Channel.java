@@ -85,7 +85,7 @@ public class Channel implements Iterator<byte[]> {
             else
             {
                 fragment = new Fragment(this.requestCounter.asInt(), 0, udpPayload, Fragment.INIT_PAYLOAD_SIZE);
-                packet = this.initFactory.makePacket(this.channelKeys, fragment);
+                packet = this.initFactory.makePacket(this.channelKeys, this.requestCounter.asPrefix(), fragment);
             }
 
             returnPackets.add(this.linkCrypt.encrypt(packet));

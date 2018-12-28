@@ -77,7 +77,7 @@ public class LinkEncryption {
             returnPacket = new DataPacket(channelID, bos.toByteArray());
         }
         else if (messageType == IPacket.TYPE_INIT)
-            returnPacket = new InitPacket(channelID, payload);
+            returnPacket = new InitPacket(channelID, messagePrefix, payload);
         else if (messageType == IPacket.TYPE_INIT_RESPONSE)
             returnPacket = new InitResponse(channelID, payload);
 

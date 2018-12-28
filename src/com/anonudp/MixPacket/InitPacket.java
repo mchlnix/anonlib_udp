@@ -1,8 +1,6 @@
 package com.anonudp.MixPacket;
 
 import com.anonudp.MixChannel.IPv4AndPort;
-import com.anonudp.MixMessage.Util;
-import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.PublicKey;
 
@@ -15,24 +13,29 @@ import static com.anonudp.Constants.MIX_SERVER_COUNT;
 public class InitPacket implements IPacket
 {
     public static final int PAYLOAD_SIZE = IPv4AndPort.SIZE;
+
     private final byte[] channelID;
+    private byte[] counterPrefix;
 
     private final PublicKey publicKey;
     private final byte[] channelKeyOnion;
     private final byte[] payloadOnion;
 
-    public InitPacket(byte[] channelID, PublicKey publicKey, byte[] channelKeyOnion, byte[] payloadOnion)
+    public InitPacket(byte[] channelID, byte[] counterPrefix, PublicKey publicKey, byte[] channelKeyOnion, byte[] payloadOnion)
     {
         this.channelID = channelID;
+
+        this.counterPrefix = counterPrefix;
 
         this.publicKey = publicKey;
         this.channelKeyOnion = channelKeyOnion;
         this.payloadOnion = payloadOnion;
     }
 
-    public InitPacket(byte[] channelID, byte[] data)
+    public InitPacket(byte[] channelID, byte[] counterPrefix, byte[] data)
     {
         this.channelID = channelID;
+        this.counterPrefix = counterPrefix;
 
         int offset = 0;
 
@@ -78,7 +81,7 @@ public class InitPacket implements IPacket
 
     @Override
     public byte[] getCTRPrefix() {
-        return Util.randomBytes(Counter.CTR_PREFIX_SIZE);
+        return this.counterPrefix;
     }
 
     @Override
@@ -101,7 +104,9 @@ public class InitPacket implements IPacket
 
     boolean equals(ProcessedInitPacket otherPacket)
     {
-        boolean is_equal = this.publicKey == otherPacket.getPublicKey();
+        boolean is_equal = Arrays.equals(this.channelID, otherPacket.getChannelID());
+        is_equal = is_equal && Arrays.equals(this.counterPrefix, otherPacket.getCTRPrefix());
+        is_equal = is_equal && this.publicKey == otherPacket.getPublicKey();
         is_equal = is_equal && this.channelKeyOnion == otherPacket.getChannelKeyOnion();
         is_equal = is_equal &&  this.payloadOnion == otherPacket.getPayloadOnion();
 

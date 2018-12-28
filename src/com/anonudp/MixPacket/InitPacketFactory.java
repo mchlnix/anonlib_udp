@@ -47,7 +47,7 @@ public class InitPacketFactory {
 
         /* decrypt channel key and payload */
 
-        Cipher cipher = createCTRCipher(symmetricDisposableKey, Cipher.DECRYPT_MODE);
+        Cipher cipher = createCTRCipher(symmetricDisposableKey, packet.getCTRPrefix(), Cipher.DECRYPT_MODE);
 
         byte[] processedChannelOnion = cipher.update(packet.getChannelKeyOnion());
 
@@ -67,10 +67,10 @@ public class InitPacketFactory {
 
         PublicKey newElement = packet.getPublicKey().blind(disposableKey);
 
-        return new ProcessedInitPacket(this.channelID, channelKey, newElement, processedChannelOnion, processedPayloadOnion);
+        return new ProcessedInitPacket(this.channelID, packet.getCTRPrefix(), channelKey, newElement, processedChannelOnion, processedPayloadOnion);
     }
 
-    public InitPacket makePacket(byte[][] channelKeys, Fragment fragment) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
+    public InitPacket makePacket(byte[][] channelKeys, byte[] counterPrefix, Fragment fragment) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
         PublicKey[] disposableKeys = new PublicKey[this.publicKeys.length];
 
         PrivateKey privateMessageKey = new PrivateKey();
@@ -106,7 +106,7 @@ public class InitPacketFactory {
 
         for (int i = disposableKeys.length - 1; i >= 0; --i)
         {
-            cipher = createCTRCipher(disposableKeys[i].toSymmetricKey(), Cipher.ENCRYPT_MODE);
+            cipher = createCTRCipher(disposableKeys[i].toSymmetricKey(), counterPrefix, Cipher.ENCRYPT_MODE);
 
             bos.write(channelKeys[i]);
             bos.write(Arrays.copyOf(channelOnion, channelOnion.length - EccGroup713.SYMMETRIC_KEY_LENGTH));
@@ -118,6 +118,8 @@ public class InitPacketFactory {
             bos.reset();
         }
 
-        return new InitPacket(channelID, publicMessageKey, channelOnion, payloadOnion);
+        return new InitPacket(channelID, counterPrefix, publicMessageKey, channelOnion, payloadOnion);
     }
+
+
 }

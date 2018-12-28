@@ -1,5 +1,6 @@
 package com.anonudp.MixMessage;
 
+import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.PrivateKey;
 import com.anonudp.MixMessage.crypto.PublicKey;
@@ -22,6 +23,8 @@ class InitPacketFactoryTest extends TestCase {
 
     private byte[] channelID;
 
+    private Counter counter;
+
     private byte[][] channelKeys;
 
     private byte[] initPayload;
@@ -40,6 +43,8 @@ class InitPacketFactoryTest extends TestCase {
         int mixCount = 3;
 
         this.channelID = new byte[]{0x01, 0x02};
+
+        this.counter = new Counter();
 
         this.privateMixKeys = new PrivateKey[mixCount];
         PublicKey[] publicMixKeys = new PublicKey[mixCount];
@@ -67,7 +72,7 @@ class InitPacketFactoryTest extends TestCase {
 
             assertEquals(initFragment.toBytes().length, Fragment.INIT_FRAGMENT_SIZE);
 
-            packet = this.factory.makePacket(this.channelKeys, initFragment);
+            packet = this.factory.makePacket(this.channelKeys, counter.asPrefix(), initFragment);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -103,9 +108,9 @@ class InitPacketFactoryTest extends TestCase {
         byte[] channelKeyOnion = new byte[this.channelKeys.length * EccGroup713.SYMMETRIC_KEY_LENGTH];
         byte[] payloadOnion = new byte[100];
 
-        InitPacket packet = new InitPacket(channelID, publicKey, channelKeyOnion, payloadOnion);
+        InitPacket packet = new InitPacket(channelID, counter.asPrefix(), publicKey, channelKeyOnion, payloadOnion);
         ProcessedInitPacket processedPacket =
-                new ProcessedInitPacket(this.channelID, channelKey, publicKey, channelKeyOnion, payloadOnion);
+                new ProcessedInitPacket(this.channelID, counter.asPrefix(), channelKey, publicKey, channelKeyOnion, payloadOnion);
 
         assertEquals(packet, processedPacket);
         assertEquals(processedPacket, packet);
@@ -119,7 +124,7 @@ class InitPacketFactoryTest extends TestCase {
 
             assertEquals(initFragment.toBytes().length, Fragment.INIT_FRAGMENT_SIZE);
 
-            this.factory.makePacket(this.channelKeys, initFragment);
+            this.factory.makePacket(this.channelKeys, counter.asPrefix(), initFragment);
         } catch (Exception e) {
             e.printStackTrace();
             fail();

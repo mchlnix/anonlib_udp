@@ -6,9 +6,9 @@ public class ProcessedInitPacket extends InitPacket
 {
     private final byte[] channelKey;
 
-    public ProcessedInitPacket(byte[] channelID, byte[] channelKey, PublicKey element, byte[] processedChannelOnion, byte[] processedPayloadOnion)
+    public ProcessedInitPacket(byte[] channelID, byte[] counterPrefix, byte[] channelKey, PublicKey element, byte[] processedChannelOnion, byte[] processedPayloadOnion)
     {
-        super(channelID, element, processedChannelOnion, processedPayloadOnion);
+        super(channelID, counterPrefix, element, processedChannelOnion, processedPayloadOnion);
 
         this.channelKey = channelKey;
     }
