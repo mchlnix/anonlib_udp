@@ -121,7 +121,7 @@ public class Fragment {
             this.padding = new Padding(0);
         }
 
-        // we only receive data fragments, so SIZE_DATA is the length of meaningful bytes, the rest is 0s
+        // we only receive data fragments, so SIZE_DATA is the length of meaningful bytes, the rest
         int payload_length = length - current_offset - this.padding.getLength();
 
         this.payload = Arrays.copyOfRange(fragment, current_offset, current_offset + payload_length);

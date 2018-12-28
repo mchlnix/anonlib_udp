@@ -5,7 +5,7 @@ import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.PrivateKey;
 import com.anonudp.MixMessage.crypto.PublicKey;
 import com.anonudp.MixPacket.InitPacket;
-import com.anonudp.MixPacket.InitPacketFactory;
+import com.anonudp.MixPacket.PacketFactory;
 import com.anonudp.MixPacket.ProcessedInitPacket;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +29,7 @@ class InitPacketFactoryTest extends TestCase {
 
     private byte[] initPayload;
 
-    private InitPacketFactory factory;
+    private PacketFactory factory;
 
     @BeforeEach
     protected void setUp()
@@ -59,7 +59,7 @@ class InitPacketFactoryTest extends TestCase {
             this.channelKeys[i] = Util.randomBytes(EccGroup713.SYMMETRIC_KEY_LENGTH);
         }
 
-        this.factory = new InitPacketFactory(channelID, initPayload, publicMixKeys);
+        this.factory = new PacketFactory(channelID, initPayload, publicMixKeys);
     }
 
     @DisplayName("Same data after making and processing a InitPacket")
@@ -72,7 +72,7 @@ class InitPacketFactoryTest extends TestCase {
 
             assertEquals(initFragment.toBytes().length, Fragment.SIZE_INIT);
 
-            packet = this.factory.makePacket(this.channelKeys, counter.asPrefix(), initFragment);
+            packet = this.factory.makeInitPacket(initFragment);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -83,7 +83,7 @@ class InitPacketFactoryTest extends TestCase {
             {
                 packet = this.factory.process(packet, this.privateMixKeys[i]);
 
-                assertArrayEquals(this.channelKeys[i], ((ProcessedInitPacket) packet).getChannelKey());
+                assertArrayEquals(this.factory.getChannelKeys()[i], ((ProcessedInitPacket) packet).getChannelKey());
             }
 
             byte[] initSpecific = Arrays.copyOf(packet.getPayloadOnion(), this.initPayload.length);
@@ -124,7 +124,7 @@ class InitPacketFactoryTest extends TestCase {
 
             assertEquals(initFragment.toBytes().length, Fragment.SIZE_INIT);
 
-            this.factory.makePacket(this.channelKeys, counter.asPrefix(), initFragment);
+            this.factory.makeInitPacket(initFragment);
         } catch (Exception e) {
             e.printStackTrace();
             fail();

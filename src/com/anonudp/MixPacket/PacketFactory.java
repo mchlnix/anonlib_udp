@@ -168,4 +168,8 @@ public class PacketFactory {
 
         return new DataPacket(this.channelID, encryptedData);
     }
+
+    public byte[][] getChannelKeys() {
+        return channelKeys;
+    }
 }

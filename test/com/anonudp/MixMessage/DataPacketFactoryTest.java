@@ -1,8 +1,8 @@
 package com.anonudp.MixMessage;
 
-import com.anonudp.MixMessage.crypto.EccGroup713;
+import com.anonudp.MixMessage.crypto.PublicKey;
 import com.anonudp.MixPacket.DataPacket;
-import com.anonudp.MixPacket.DataPacketFactory;
+import com.anonudp.MixPacket.PacketFactory;
 import com.anonudp.MixPacket.ProcessedDataPacket;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,11 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class DataPacketFactoryTest extends TestCase {
     private byte[] payload;
-    private byte[][] channelKeys;
 
     private byte[] channelID;
 
-    private DataPacketFactory factory;
+    private PacketFactory factory;
 
     @BeforeEach
     protected void setUp()
@@ -26,18 +25,11 @@ class DataPacketFactoryTest extends TestCase {
 
         this.payload = Util.randomBytes(payloadLength);
 
-        int mixCount = 3;
-
         this.channelID = new byte[]{0x01, 0x02};
 
-        this.channelKeys = new byte[mixCount][EccGroup713.SYMMETRIC_KEY_LENGTH];
+        PublicKey[] publicKeys = new PublicKey[3];
 
-        for (int i = 0; i < channelKeys.length; ++i)
-        {
-            this.channelKeys[i] = Util.randomBytes(EccGroup713.SYMMETRIC_KEY_LENGTH);
-        }
-
-        this.factory = new DataPacketFactory(this.channelID, this.channelKeys);
+        this.factory = new PacketFactory(this.channelID, new byte[6], publicKeys);
     }
 
     @DisplayName("DataPacket creation throws no Exceptions")
@@ -48,7 +40,7 @@ class DataPacketFactoryTest extends TestCase {
 
             assertEquals(dataFragment.toBytes().length, Fragment.SIZE_DATA);
 
-            this.factory.makePacket(dataFragment);
+            this.factory.makeDataPacket(dataFragment);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -62,14 +54,14 @@ class DataPacketFactoryTest extends TestCase {
 
         Fragment dataFragment = new Fragment(1234, 0, this.payload, Fragment.DATA_PAYLOAD_SIZE);
         try {
-            packet = this.factory.makePacket(dataFragment);
+            packet = this.factory.makeDataPacket(dataFragment);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
         }
 
         try {
-            for (byte[] channelKey : this.channelKeys) {
+            for (byte[] channelKey : this.factory.getChannelKeys()) {
                 packet = this.factory.process(packet, channelKey);
             }
 
