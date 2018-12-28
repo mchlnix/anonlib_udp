@@ -1,4 +1,4 @@
-package com.anonudp.MixMessage;
+package com.anonudp.MixMessage.crypto;
 
 import com.anonudp.MixMessage.crypto.Counter;
 import junit.framework.TestCase;

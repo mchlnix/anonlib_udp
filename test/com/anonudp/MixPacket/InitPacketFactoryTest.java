@@ -1,12 +1,11 @@
-package com.anonudp.MixMessage;
+package com.anonudp.MixPacket;
 
+import com.anonudp.MixMessage.Fragment;
+import com.anonudp.MixMessage.Util;
 import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.PrivateKey;
 import com.anonudp.MixMessage.crypto.PublicKey;
-import com.anonudp.MixPacket.InitPacket;
-import com.anonudp.MixPacket.PacketFactory;
-import com.anonudp.MixPacket.ProcessedInitPacket;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

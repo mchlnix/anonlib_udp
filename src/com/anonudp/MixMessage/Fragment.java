@@ -24,7 +24,7 @@ public class Fragment {
     private static final int HEADER_SIZE = ID_SIZE + INDEX_SIZE;
 
     public static final int SIZE_DATA = HEADER_SIZE + DATA_PAYLOAD_SIZE;
-    static final int SIZE_INIT = HEADER_SIZE + INIT_PAYLOAD_SIZE;
+    public static final int SIZE_INIT = HEADER_SIZE + INIT_PAYLOAD_SIZE;
 
     static final int SINGLE_FRAGMENT_MESSAGE_ID = 0;
     static final int SINGLE_FRAGMENT_FRAGMENT_NUMBER = 0;

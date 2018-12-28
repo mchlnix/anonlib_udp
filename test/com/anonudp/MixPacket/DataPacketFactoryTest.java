@@ -1,5 +1,7 @@
-package com.anonudp.MixMessage;
+package com.anonudp.MixPacket;
 
+import com.anonudp.MixMessage.Fragment;
+import com.anonudp.MixMessage.Util;
 import com.anonudp.MixMessage.crypto.PublicKey;
 import com.anonudp.MixPacket.DataPacket;
 import com.anonudp.MixPacket.PacketFactory;
