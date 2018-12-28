@@ -46,7 +46,7 @@ class DataPacketFactoryTest extends TestCase {
         try {
             Fragment dataFragment = new Fragment(1234, 0, this.payload, Fragment.DATA_PAYLOAD_SIZE);
 
-            assertEquals(dataFragment.toBytes().length, Fragment.DATA_FRAGMENT_SIZE);
+            assertEquals(dataFragment.toBytes().length, Fragment.SIZE_DATA);
 
             this.factory.makePacket(dataFragment);
         } catch (Exception e) {

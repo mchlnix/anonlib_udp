@@ -2,14 +2,12 @@ package com.anonudp.MixChannel;
 
 import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.FragmentPool;
-import com.anonudp.MixMessage.Util;
 import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.LinkEncryption;
 import com.anonudp.MixMessage.crypto.PublicKey;
-import com.anonudp.MixPacket.DataPacketFactory;
-import com.anonudp.MixPacket.InitPacketFactory;
 import com.anonudp.MixPacket.IPacket;
+import com.anonudp.MixPacket.PacketFactory;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -30,32 +28,23 @@ public class Channel implements Iterator<byte[]> {
     static final int HIGHEST_ID = Double.valueOf(Math.pow(2, 8 * ID_SIZE) - 1).intValue();
     private static final HashMap<Integer, Channel> table = new HashMap<>();
 
-    private InitPacketFactory initFactory;
-    private DataPacketFactory dataFactory;
+    private PacketFactory packetFactory;
 
     private LinkEncryption linkCrypt;
     private Counter requestCounter;
-
-    private final byte[][] channelKeys;
 
     private boolean initialized;
 
     private FragmentPool fragmentPool;
 
     public Channel(IPv4AndPort source, IPv4AndPort destination, PublicKey[] mixPublicKeys) throws IOException {
-        this.channelKeys = new byte[mixPublicKeys.length][EccGroup713.SYMMETRIC_KEY_LENGTH];
-
-        for(int i = 0; i < mixPublicKeys.length; ++i)
-            this.channelKeys[i] = Util.randomBytes(EccGroup713.SYMMETRIC_KEY_LENGTH);
-
         int id = Channel.randomID();
         byte[] idBytes = new byte[2];
 
         idBytes[0] = (byte) (id & 0xFF00);
         idBytes[1] = (byte) (id & 0x00FF);
 
-        this.initFactory = new InitPacketFactory(idBytes, destination.toBytes(), mixPublicKeys);
-        this.dataFactory = new DataPacketFactory(idBytes, this.channelKeys);
+        this.packetFactory = new PacketFactory(idBytes, destination.toBytes(), mixPublicKeys);
 
         this.linkCrypt = new LinkEncryption(new byte[EccGroup713.SYMMETRIC_KEY_LENGTH]);
         this.requestCounter = new Counter();
@@ -80,12 +69,14 @@ public class Channel implements Iterator<byte[]> {
 
             if (this.initialized) {
                 fragment = new Fragment(this.requestCounter.asInt(), 0, udpPayload, Fragment.DATA_PAYLOAD_SIZE);
-                packet = this.dataFactory.makePacket(fragment);
+
+                packet = this.packetFactory.makeDataPacket(fragment);
             }
             else
             {
                 fragment = new Fragment(this.requestCounter.asInt(), 0, udpPayload, Fragment.INIT_PAYLOAD_SIZE);
-                packet = this.initFactory.makePacket(this.channelKeys, this.requestCounter.asPrefix(), fragment);
+
+                packet = this.packetFactory.makeInitPacket(fragment);
             }
 
             returnPackets.add(this.linkCrypt.encrypt(packet));

@@ -70,7 +70,7 @@ class InitPacketFactoryTest extends TestCase {
         try {
             Fragment initFragment = new Fragment(1234, 0, this.payload, Fragment.INIT_PAYLOAD_SIZE);
 
-            assertEquals(initFragment.toBytes().length, Fragment.INIT_FRAGMENT_SIZE);
+            assertEquals(initFragment.toBytes().length, Fragment.SIZE_INIT);
 
             packet = this.factory.makePacket(this.channelKeys, counter.asPrefix(), initFragment);
         } catch (Exception e) {
@@ -90,7 +90,7 @@ class InitPacketFactoryTest extends TestCase {
             byte[] fragment = Arrays.copyOfRange(packet.getPayloadOnion(), this.initPayload.length, packet.getPayloadOnion().length);
 
             assertArrayEquals(initPayload, initSpecific);
-            assertArrayEquals(this.payload, new Fragment(fragment).getPayload());
+            assertArrayEquals(this.payload, new Fragment(fragment, Fragment.SIZE_INIT).getPayload());
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -122,7 +122,7 @@ class InitPacketFactoryTest extends TestCase {
         try {
             Fragment initFragment = new Fragment(1234, 0, this.payload, Fragment.INIT_PAYLOAD_SIZE);
 
-            assertEquals(initFragment.toBytes().length, Fragment.INIT_FRAGMENT_SIZE);
+            assertEquals(initFragment.toBytes().length, Fragment.SIZE_INIT);
 
             this.factory.makePacket(this.channelKeys, counter.asPrefix(), initFragment);
         } catch (Exception e) {

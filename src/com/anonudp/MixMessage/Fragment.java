@@ -23,8 +23,9 @@ public class Fragment {
     private static final int INDEX_SIZE = 1;
     private static final int HEADER_SIZE = ID_SIZE + INDEX_SIZE;
 
-    public static final int DATA_FRAGMENT_SIZE = HEADER_SIZE + DATA_PAYLOAD_SIZE;
-    static final int INIT_FRAGMENT_SIZE = HEADER_SIZE + INIT_PAYLOAD_SIZE;
+    public static final int SIZE_DATA = HEADER_SIZE + DATA_PAYLOAD_SIZE;
+    static final int SIZE_INIT = HEADER_SIZE + INIT_PAYLOAD_SIZE;
+
     static final int SINGLE_FRAGMENT_MESSAGE_ID = 0;
     static final int SINGLE_FRAGMENT_FRAGMENT_NUMBER = 0;
 
@@ -74,7 +75,12 @@ public class Fragment {
             this.payload = payload;
     }
 
-    public Fragment(byte[] fragment) {
+    public Fragment(byte[] fragment)
+    {
+        this(fragment, SIZE_DATA);
+    }
+
+    public Fragment(byte[] fragment, int length) {
         this.bytesCached = false;
         this.byteArrayCache = new byte[fragment.length];
 
@@ -115,7 +121,8 @@ public class Fragment {
             this.padding = new Padding(0);
         }
 
-        int payload_length = fragment.length - current_offset - this.padding.getLength();
+        // we only receive data fragments, so SIZE_DATA is the length of meaningful bytes, the rest is 0s
+        int payload_length = length - current_offset - this.padding.getLength();
 
         this.payload = Arrays.copyOfRange(fragment, current_offset, current_offset + payload_length);
     }
