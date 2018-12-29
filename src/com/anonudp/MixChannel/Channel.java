@@ -60,29 +60,32 @@ public class Channel implements Iterator<byte[]> {
     public byte[][] request(byte[] udpPayload) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
         ArrayList<byte[]> returnPackets = new ArrayList<>();
 
+        this.requestCounter.count();
+        int fragmentNumber = 0;
+
         while (udpPayload.length > 0)
         {
-            this.requestCounter.count();
-
             Fragment fragment;
 
             IPacket packet;
 
             if (this.initialized) {
-                fragment = new Fragment(this.requestCounter.asInt(), 0, udpPayload, Fragment.DATA_PAYLOAD_SIZE);
+                fragment = new Fragment(this.requestCounter.asInt(), fragmentNumber, udpPayload, Fragment.DATA_PAYLOAD_SIZE);
 
                 packet = this.packetFactory.makeDataPacket(fragment);
             }
             else
             {
-                fragment = new Fragment(this.requestCounter.asInt(), 0, udpPayload, Fragment.INIT_PAYLOAD_SIZE);
+                fragment = new Fragment(this.requestCounter.asInt(), fragmentNumber, udpPayload, Fragment.INIT_PAYLOAD_SIZE);
 
                 packet = this.packetFactory.makeInitPacket(fragment);
             }
 
             returnPackets.add(this.linkCrypt.encrypt(packet));
 
-            udpPayload = Arrays.copyOf(udpPayload, udpPayload.length - fragment.getPayload().length);
+            udpPayload = Arrays.copyOfRange(udpPayload, fragment.getPayload().length, udpPayload.length);
+
+            ++fragmentNumber;
         }
 
         return returnPackets.toArray(new byte[0][]);
@@ -123,9 +126,14 @@ public class Channel implements Iterator<byte[]> {
         return channelID;
     }
 
-    static void removeAllChannels()
+    static void _removeAllChannels()
     {
         Channel.table.clear();
+    }
+
+    void _setInitialized()
+    {
+        this.initialized = true;
     }
 
     /* Iterator methods */
