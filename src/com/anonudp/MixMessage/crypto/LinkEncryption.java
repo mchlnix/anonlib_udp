@@ -20,6 +20,8 @@ import java.util.Arrays;
 import static com.anonudp.MixMessage.Util.randomBytes;
 
 public class LinkEncryption {
+    public static final int OVERHEAD = Counter.CTR_PREFIX_SIZE + Util.GCM_BLOCK_SIZE + Util.GCM_MAC_SIZE;
+
     private final byte[] key;
     private final Counter counter;
 

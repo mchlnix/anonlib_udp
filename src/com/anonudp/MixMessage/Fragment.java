@@ -12,7 +12,7 @@ import java.util.Arrays;
 import static com.anonudp.Constants.MIX_SERVER_COUNT;
 
 public class Fragment {
-    private static final int DATA_OVERHEAD = (MIX_SERVER_COUNT - 1) * Counter.CTR_PREFIX_SIZE;
+    public static final int DATA_OVERHEAD = (MIX_SERVER_COUNT - 1) * Counter.CTR_PREFIX_SIZE;
     private static final int INIT_OVERHEAD = PublicKey.SIZE + MIX_SERVER_COUNT * EccGroup713.SYMMETRIC_KEY_LENGTH + InitPacket.PAYLOAD_SIZE;
 
     private static final int DUMMY_PAYLOAD_SIZE = 0;

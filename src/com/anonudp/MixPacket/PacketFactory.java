@@ -172,4 +172,8 @@ public class PacketFactory {
     public byte[][] getChannelKeys() {
         return channelKeys;
     }
+
+    public byte[] getChannelID() {
+        return channelID;
+    }
 }

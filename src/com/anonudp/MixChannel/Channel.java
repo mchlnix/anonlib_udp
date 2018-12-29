@@ -6,6 +6,7 @@ import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.LinkEncryption;
 import com.anonudp.MixMessage.crypto.PublicKey;
+import com.anonudp.MixPacket.DataPacket;
 import com.anonudp.MixPacket.IPacket;
 import com.anonudp.MixPacket.PacketFactory;
 
@@ -94,7 +95,15 @@ public class Channel implements Iterator<byte[]> {
             this.initialized = true;
         }
         else {
-            Fragment fragment = new Fragment(plainText.getData());
+            DataPacket packet = (DataPacket) plainText;
+
+            for (byte[] channelKey: this.packetFactory.getChannelKeys())
+            {
+                packet = packetFactory.process(packet, channelKey);
+            }
+
+            Fragment fragment = new Fragment(packet.toBytes());
+
             this.fragmentPool.addFragment(fragment);
         }
     }

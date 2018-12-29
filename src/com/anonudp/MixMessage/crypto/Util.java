@@ -11,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
 public class Util {
+    static final int GCM_BLOCK_SIZE = 16;
     static final int GCM_MAC_SIZE = 16;
 
     public static Cipher createCTRCipher(byte[] symmetricKey, byte[] iv, int mode) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {

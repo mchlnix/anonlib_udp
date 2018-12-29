@@ -4,8 +4,12 @@ import com.anonudp.MixMessage.crypto.Counter;
 
 import java.util.Arrays;
 
+import static com.anonudp.MixMessage.Fragment.DATA_OVERHEAD;
+import static com.anonudp.MixMessage.Fragment.SIZE_DATA;
+
 public class DataPacket implements IPacket
 {
+    public static final int SIZE = DATA_OVERHEAD + SIZE_DATA;
     private final byte[] channelID;
 
     private final byte[] byteArray;
