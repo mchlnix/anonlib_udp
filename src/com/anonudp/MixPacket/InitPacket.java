@@ -96,13 +96,13 @@ public class InitPacket implements IPacket
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof ProcessedInitPacket)
-            return this.equals((ProcessedInitPacket) obj);
+        if (obj instanceof InitPacket)
+            return this.equals((InitPacket) obj);
 
         return super.equals(obj);
     }
 
-    boolean equals(ProcessedInitPacket otherPacket)
+    boolean equals(InitPacket otherPacket)
     {
         boolean is_equal = Arrays.equals(this.channelID, otherPacket.getChannelID());
         is_equal = is_equal && Arrays.equals(this.counterPrefix, otherPacket.getCTRPrefix());
