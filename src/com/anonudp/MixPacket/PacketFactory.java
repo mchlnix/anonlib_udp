@@ -94,6 +94,8 @@ public class PacketFactory {
     }
 
     public InitPacket makeInitPacket(Fragment fragment) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
+        this.requestCounter.count();
+
         PublicKey[] disposableKeys = new PublicKey[this.publicKeys.length];
 
         PrivateKey privateMessageKey = new PrivateKey();
