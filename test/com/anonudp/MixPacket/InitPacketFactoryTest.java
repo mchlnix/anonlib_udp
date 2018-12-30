@@ -11,9 +11,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class InitPacketFactoryTest extends TestCase {
     private byte[] payload;
@@ -128,5 +137,35 @@ class InitPacketFactoryTest extends TestCase {
             e.printStackTrace();
             fail();
         }
+    }
+
+    @DisplayName("Different message counters make different packets")
+    @Test
+    void counterMasking() throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
+        Fragment fragment = new Fragment(1234, 0, Util.randomBytes(10), Fragment.INIT_PAYLOAD_SIZE);
+
+        InitPacket original = this.factory.makeInitPacket(fragment);
+
+        // make fake packet
+
+        byte[] fakePrefix = new byte[Counter.CTR_PREFIX_SIZE];
+
+        InitPacket fake = new InitPacket(original.getChannelID(), fakePrefix, original.getPublicKey(), original.getChannelKeyOnion(), original.getPayloadOnion());
+
+        assertNotEquals(original, fake);
+
+        ProcessedInitPacket processedOriginal = this.factory.process(original, this.privateMixKeys[0]);
+        ProcessedInitPacket processedFake = this.factory.process(fake, this.privateMixKeys[0]);
+
+        assertNotEquals(processedOriginal, processedFake);
+
+        assertArrayEquals(processedOriginal.getChannelID(), processedFake.getChannelID());
+
+        assertFalse(Arrays.equals(processedOriginal.getCTRPrefix(), processedFake.getCTRPrefix()));
+
+        assertFalse(Arrays.equals(processedOriginal.getChannelKeyOnion(), processedFake.getChannelKeyOnion()));
+        assertFalse(Arrays.equals(processedOriginal.getPayloadOnion(), processedFake.getPayloadOnion()));
+
+        assertNotEquals(processedOriginal.getPublicKey(), processedFake.getPublicKey());
     }
 }
