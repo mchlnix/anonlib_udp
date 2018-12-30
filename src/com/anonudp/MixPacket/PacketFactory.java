@@ -2,10 +2,7 @@ package com.anonudp.MixPacket;
 
 import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.Util;
-import com.anonudp.MixMessage.crypto.Counter;
-import com.anonudp.MixMessage.crypto.EccGroup713;
-import com.anonudp.MixMessage.crypto.PrivateKey;
-import com.anonudp.MixMessage.crypto.PublicKey;
+import com.anonudp.MixMessage.crypto.*;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -55,8 +52,7 @@ public class PacketFactory {
     public ProcessedInitPacket process(InitPacket packet, PrivateKey privateKey) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException {
 
         /* create shared key, originally used to encrypt */
-
-        PublicKey disposableKey = packet.getPublicKey().blind(privateKey);
+        PublicKey disposableKey = packet.getPublicKey().blind(privateKey).blind(packet.getCTRPrefix());
 
         byte[] symmetricDisposableKey = disposableKey.toSymmetricKey();
 
@@ -96,6 +92,8 @@ public class PacketFactory {
     public InitPacket makeInitPacket(Fragment fragment) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
         this.requestCounter.count();
 
+        byte[] messagePrefix = this.requestCounter.asPrefix();
+
         PublicKey[] disposableKeys = new PublicKey[this.publicKeys.length];
 
         PrivateKey privateMessageKey = new PrivateKey();
@@ -103,13 +101,13 @@ public class PacketFactory {
 
         /* create shared disposable keys */
 
-        disposableKeys[0] = this.publicKeys[0].blind(privateMessageKey);
+        disposableKeys[0] = this.publicKeys[0].blind(privateMessageKey).blind(messagePrefix);
 
         for (int i = 1; i < this.publicKeys.length; ++i)
         {
             privateMessageKey = privateMessageKey.blind(disposableKeys[i-1]);
 
-            disposableKeys[i] = this.publicKeys[i].blind(privateMessageKey);
+            disposableKeys[i] = this.publicKeys[i].blind(privateMessageKey).blind(messagePrefix);
         }
 
         /* preparing "onions" */
@@ -131,7 +129,7 @@ public class PacketFactory {
 
         for (int i = disposableKeys.length - 1; i >= 0; --i)
         {
-            cipher = createCTRCipher(disposableKeys[i].toSymmetricKey(), this.requestCounter.asPrefix(), Cipher.ENCRYPT_MODE);
+            cipher = createCTRCipher(disposableKeys[i].toSymmetricKey(), messagePrefix, Cipher.ENCRYPT_MODE);
 
             bos.write(this.channelKeys[i]);
             bos.write(Arrays.copyOf(channelOnion, channelOnion.length - EccGroup713.SYMMETRIC_KEY_LENGTH));

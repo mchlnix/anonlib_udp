@@ -22,7 +22,7 @@ class BlindingFactor
         this(publicKey.toSymmetricKey());
     }
 
-    private BlindingFactor(byte[] symmetricKey) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException {
+    BlindingFactor(byte[] symmetricKey) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException {
         this.underlyingValue = EccGroup713.hb(symmetricKey);
     }
 

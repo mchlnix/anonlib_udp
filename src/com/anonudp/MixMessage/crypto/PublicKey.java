@@ -54,6 +54,13 @@ public class PublicKey
         return this.blind(blindingFactor);
     }
 
+    public PublicKey blind(byte[] messageCounterPrefix) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
+        byte[] iv = new Counter(messageCounterPrefix).asIV();
+        BlindingFactor blindingFactor = new BlindingFactor(iv);
+
+        return this.blind(blindingFactor);
+    }
+
     private PublicKey blind(BlindingFactor blindingFactor)
     {
         return new PublicKey(EccGroup713.powInGroup(this.underlyingValue, blindingFactor.getUnderlyingValue()));
