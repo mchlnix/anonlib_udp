@@ -35,7 +35,7 @@ class MultipleFragmentTest extends TestCase {
 
         this.padding_size_bytes_frag1 = new Padding(0).getLengthAsBytes();
 
-        this.padding_size_bytes_frag2 = new Padding(44).getLengthAsBytes();
+        this.padding_size_bytes_frag2 = new Padding(2 * Fragment.DATA_PAYLOAD_SIZE - payload_length).getLengthAsBytes();
 
         this.fragment1 = new Fragment(this.message_id, 0,
                 this.payload, Fragment.DATA_PAYLOAD_SIZE);

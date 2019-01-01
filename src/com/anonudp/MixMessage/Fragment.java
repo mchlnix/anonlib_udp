@@ -16,7 +16,7 @@ public class Fragment {
     private static final int INIT_OVERHEAD = PublicKey.SIZE + MIX_SERVER_COUNT * EccGroup713.SYMMETRIC_KEY_LENGTH + InitPacket.PAYLOAD_SIZE;
 
     private static final int DUMMY_PAYLOAD_SIZE = 0;
-    public static final int DATA_PAYLOAD_SIZE = 272;
+    public static final int DATA_PAYLOAD_SIZE = 274;
     public static final int INIT_PAYLOAD_SIZE = DATA_PAYLOAD_SIZE - (INIT_OVERHEAD - DATA_OVERHEAD);
 
     static final int ID_SIZE = 2;
