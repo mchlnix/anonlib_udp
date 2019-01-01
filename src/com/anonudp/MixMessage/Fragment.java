@@ -49,11 +49,12 @@ public class Fragment {
 
     public Fragment(int message_id, int fragment_number, byte[] payload, int payload_limit) {
         if (payload_limit != INIT_PAYLOAD_SIZE && payload_limit != DATA_PAYLOAD_SIZE && payload_limit != DUMMY_PAYLOAD_SIZE)
-            throw new IllegalArgumentException("Payload limit is not an accepted value. Used Fragment.FRAGMENT_*_PAYLOAD instead.");
+            throw new IllegalArgumentException("Payload limit is not an accepted value. Use Fragment.*_PAYLOAD_SIZE instead.");
 
         this.bytesCached = false;
         this.byteArrayCache = new byte[HEADER_SIZE + payload_limit];
 
+        // TODO: Isn't this only necessary for 275 Byte fragments?
         if (fragment_number == 0 && payload.length <= payload_limit + 1) {
             this.message_id = SINGLE_FRAGMENT_MESSAGE_ID;
 
