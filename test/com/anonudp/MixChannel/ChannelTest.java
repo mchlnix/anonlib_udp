@@ -1,6 +1,5 @@
 package com.anonudp.MixChannel;
 
-import com.anonudp.MixMessage.Util;
 import com.anonudp.MixMessage.crypto.PrivateKey;
 import com.anonudp.MixMessage.crypto.PublicKey;
 import junit.framework.TestCase;
@@ -19,7 +18,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static com.anonudp.MixMessage.Util.randomBytes;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ChannelTest extends TestCase {
     private IPv4AndPort source, destination;
@@ -61,12 +61,14 @@ class ChannelTest extends TestCase {
         }
 
         Assertions.assertThrows(IllegalStateException.class, () -> new Channel(this.source, this.destination, this.mixKeys));
+
+        Channel._removeAllChannels();
     }
 
     @DisplayName("Split payload into multiple fragments")
     @Test
     void request() throws IOException, NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException {
-        byte[] udpPayload = Util.randomBytes(500);
+        byte[] udpPayload = randomBytes(500);
 
         Channel channel = new Channel(this.source, this.destination, this.mixKeys);
 
@@ -80,7 +82,7 @@ class ChannelTest extends TestCase {
     @DisplayName("Make multiple response fragments to one message")
     @Test
     void response() throws IOException, NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException {
-        byte[] udpPayload = Util.randomBytes(500);
+        byte[] udpPayload = randomBytes(500);
 
         Channel channel = new Channel(this.source, this.destination, this.mixKeys);
 
@@ -93,5 +95,19 @@ class ChannelTest extends TestCase {
 
         assertTrue(channel.hasNext());
         assertArrayEquals(udpPayload, channel.next());
+    }
+
+    @DisplayName("A duplicate response is detected")
+    @Test
+    void detectReplay() throws IOException, NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException {
+        Channel channel = new Channel(this.source, this.destination, this.mixKeys);
+
+        channel._setInitialized();
+
+        byte[] dataPacket = channel.request(randomBytes(100))[0];
+
+        assertDoesNotThrow(() -> channel.response(dataPacket));
+
+        assertThrows(IllegalStateException.class, () -> channel.response(dataPacket));
     }
 }

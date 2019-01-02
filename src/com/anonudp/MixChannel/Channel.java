@@ -2,10 +2,7 @@ package com.anonudp.MixChannel;
 
 import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.FragmentPool;
-import com.anonudp.MixMessage.crypto.Counter;
-import com.anonudp.MixMessage.crypto.EccGroup713;
-import com.anonudp.MixMessage.crypto.LinkEncryption;
-import com.anonudp.MixMessage.crypto.PublicKey;
+import com.anonudp.MixMessage.crypto.*;
 import com.anonudp.MixPacket.DataPacket;
 import com.anonudp.MixPacket.IPacket;
 import com.anonudp.MixPacket.PacketFactory;
@@ -26,7 +23,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /*
 TODO: implement Channel Timeout
-TODO: implement replay-detection
 TODO: Use Short for Channel-ID?
  */
 public class Channel implements Iterator<byte[]> {
@@ -38,6 +34,7 @@ public class Channel implements Iterator<byte[]> {
 
     private LinkEncryption linkCrypt;
     private Counter requestCounter;
+    private ReplayDetection responseReplay;
 
     private boolean initialized;
 
@@ -54,6 +51,7 @@ public class Channel implements Iterator<byte[]> {
 
         this.linkCrypt = new LinkEncryption(new byte[EccGroup713.SYMMETRIC_KEY_LENGTH]);
         this.requestCounter = new Counter();
+        this.responseReplay = new ReplayDetection();
 
         this.initialized = false;
 
@@ -98,6 +96,9 @@ public class Channel implements Iterator<byte[]> {
 
     public void response(byte[] data) throws IOException, NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException {
         IPacket plainText = this.linkCrypt.decrypt(data);
+
+        if (! this.responseReplay.isValid(plainText.getCTRPrefix()))
+            throw new IllegalStateException("Response Replay detected.");
 
         if (plainText.getPacketType() == IPacket.TYPE_INIT_RESPONSE) {
             this.initialized = true;
