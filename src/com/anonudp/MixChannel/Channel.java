@@ -24,6 +24,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
+/*
+TODO: implement Channel Timeout
+TODO: implement replay-detection
+TODO: Use Short for Channel-ID?
+ */
 public class Channel implements Iterator<byte[]> {
     private static final int ID_SIZE = 2; // byte
     static final int HIGHEST_ID = Double.valueOf(Math.pow(2, 8 * ID_SIZE) - 1).intValue();

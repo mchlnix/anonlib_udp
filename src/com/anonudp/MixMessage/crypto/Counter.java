@@ -2,6 +2,10 @@ package com.anonudp.MixMessage.crypto;
 
 import java.nio.ByteBuffer;
 
+/*
+TODO: Only use 4 Bytes as CTR_PREFIX_SIZE, or switch to BigInteger
+ */
+
 public class Counter {
     public static final int CTR_PREFIX_SIZE = 8;
     private static final int CTR_PREFIX_OFFSET = CTR_PREFIX_SIZE - Integer.BYTES;
