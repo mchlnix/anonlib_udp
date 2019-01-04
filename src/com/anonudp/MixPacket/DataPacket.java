@@ -2,6 +2,7 @@ package com.anonudp.MixPacket;
 
 import com.anonudp.MixMessage.crypto.Counter;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
 import static com.anonudp.MixMessage.Fragment.DATA_OVERHEAD;
@@ -23,6 +24,20 @@ public class DataPacket implements IPacket
         this.byteArray = fragment;
         this.ctrPrefix = null;
         this.encryptedData = null;
+    }
+
+    public DataPacket(byte[] channelID, byte[] ctrPrefix, byte[] payload) {
+        this.channelID = channelID;
+
+        this.ctrPrefix = ctrPrefix;
+        this.encryptedData = payload;
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        bos.write(ctrPrefix, 0, ctrPrefix.length);
+        bos.write(payload, 0, payload.length);
+
+        this.byteArray = bos.toByteArray();
     }
 
     public byte[] toBytes()

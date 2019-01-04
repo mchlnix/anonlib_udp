@@ -1,5 +1,6 @@
 package com.anonudp.MixMessage.crypto;
 
+import com.anonudp.MixChannel.Channel;
 import com.anonudp.MixPacket.DataPacket;
 import com.anonudp.MixPacket.InitPacket;
 import com.anonudp.MixPacket.InitResponse;
@@ -9,6 +10,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -21,6 +23,7 @@ import static com.anonudp.MixMessage.Util.randomBytes;
 
 public class LinkEncryption {
     public static final int OVERHEAD = Counter.CTR_PREFIX_SIZE + Util.GCM_BLOCK_SIZE + Util.GCM_MAC_SIZE;
+    private static final int RESERVED = Util.GCM_BLOCK_SIZE - Channel.ID_SIZE - Counter.CTR_PREFIX_SIZE - IPacket.TYPE_BYTE_SIZE;
 
     private final byte[] key;
     private final Counter counter;
@@ -44,7 +47,7 @@ public class LinkEncryption {
         gcm.update(packet.getCTRPrefix());
         gcm.update(new byte[]{packet.getPacketType()});
 
-        bos.write(gcm.doFinal(randomBytes(5)));
+        bos.write(gcm.doFinal(randomBytes(RESERVED)));
 
         bos.write(packet.getData());
 
@@ -64,20 +67,21 @@ public class LinkEncryption {
         byte[] plainText = gcm.doFinal(cipherTextAndMac);
 
         // todo make constants
-        byte[] channelID = Arrays.copyOf(plainText, 2);
-        byte[] messagePrefix = Arrays.copyOfRange(plainText, 2, 2 + Counter.CTR_PREFIX_SIZE);
-        byte messageType = plainText[2 + Counter.CTR_PREFIX_SIZE];
+
+        ByteArrayInputStream bis = new ByteArrayInputStream(plainText);
+
+        byte[] channelID = new byte[Channel.ID_SIZE];
+        byte[] messagePrefix = new byte[Counter.CTR_PREFIX_SIZE];
+        byte messageType;
+
+        bis.read(channelID, 0, channelID.length);
+        bis.read(messagePrefix, 0, messagePrefix.length);
+        messageType = (byte) bis.read();
 
         IPacket returnPacket = null;
 
-        if (messageType == IPacket.TYPE_DATA) {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-            bos.write(messagePrefix);
-            bos.write(payload);
-
-            returnPacket = new DataPacket(channelID, bos.toByteArray());
-        }
+        if (messageType == IPacket.TYPE_DATA)
+            returnPacket = new DataPacket(channelID, messagePrefix, payload);
         else if (messageType == IPacket.TYPE_INIT)
             returnPacket = new InitPacket(channelID, messagePrefix, payload);
         else if (messageType == IPacket.TYPE_INIT_RESPONSE)

@@ -58,7 +58,7 @@ public class PacketFactory {
 
         /* decrypt channel key and payload */
 
-        Cipher cipher = createCTRCipher(symmetricDisposableKey, packet.getCTRPrefix(), Cipher.DECRYPT_MODE);
+        Cipher cipher = createCTRCipher(symmetricDisposableKey, new Counter(packet.getCTRPrefix()).asIV(), Cipher.DECRYPT_MODE);
 
         byte[] processedChannelOnion = cipher.update(packet.getChannelKeyOnion());
 
@@ -129,7 +129,7 @@ public class PacketFactory {
 
         for (int i = disposableKeys.length - 1; i >= 0; --i)
         {
-            cipher = createCTRCipher(disposableKeys[i].toSymmetricKey(), messagePrefix, Cipher.ENCRYPT_MODE);
+            cipher = createCTRCipher(disposableKeys[i].toSymmetricKey(), new Counter(messagePrefix).asIV(), Cipher.ENCRYPT_MODE);
 
             bos.write(this.channelKeys[i]);
             bos.write(Arrays.copyOf(channelOnion, channelOnion.length - EccGroup713.SYMMETRIC_KEY_LENGTH));
