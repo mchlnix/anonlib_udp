@@ -38,7 +38,7 @@ public class LinkEncryption {
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        bos.write(this.counter.asPrefix());
+        bos.write(this.counter.asBytes());
 
         gcm.update(packet.getChannelID());
         gcm.update(packet.getCTRPrefix());

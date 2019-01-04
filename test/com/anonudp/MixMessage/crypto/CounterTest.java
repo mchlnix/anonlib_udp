@@ -1,6 +1,5 @@
 package com.anonudp.MixMessage.crypto;
 
-import com.anonudp.MixMessage.crypto.Counter;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,7 +52,7 @@ class CounterTest extends TestCase {
     @DisplayName("To AES-CTR-Prefix")
     @Test
     void asPrefix() {
-        assertArrayEquals(countPrefix, new Counter(this.countValue).asPrefix());
+        assertArrayEquals(countPrefix, new Counter(this.countValue).asBytes());
     }
 
     @DisplayName("To AES-CTR-IV")

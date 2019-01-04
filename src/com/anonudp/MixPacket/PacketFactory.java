@@ -92,7 +92,7 @@ public class PacketFactory {
     public InitPacket makeInitPacket(Fragment fragment) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
         this.requestCounter.count();
 
-        byte[] messagePrefix = this.requestCounter.asPrefix();
+        byte[] messagePrefix = this.requestCounter.asBytes();
 
         PublicKey[] disposableKeys = new PublicKey[this.publicKeys.length];
 
@@ -141,7 +141,7 @@ public class PacketFactory {
             bos.reset();
         }
 
-        return new InitPacket(channelID, this.requestCounter.asPrefix(), publicMessageKey, channelOnion, payloadOnion);
+        return new InitPacket(channelID, this.requestCounter.asBytes(), publicMessageKey, channelOnion, payloadOnion);
     }
 
     public DataPacket makeDataPacket(Fragment fragment) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException, BadPaddingException, IllegalBlockSizeException {
@@ -163,7 +163,7 @@ public class PacketFactory {
             System.arraycopy(tmpEncrypted,0, encryptedData, dataOffset, dataSize);
 
             // prepend the counter prefix to the payload
-            System.arraycopy(requestCounter.asPrefix(), 0, encryptedData, i * Counter.CTR_PREFIX_SIZE, Counter.CTR_PREFIX_SIZE);
+            System.arraycopy(requestCounter.asBytes(), 0, encryptedData, i * Counter.CTR_PREFIX_SIZE, Counter.CTR_PREFIX_SIZE);
         }
 
         return new DataPacket(this.channelID, encryptedData);

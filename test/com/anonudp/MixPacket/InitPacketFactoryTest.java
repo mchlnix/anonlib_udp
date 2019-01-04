@@ -116,9 +116,9 @@ class InitPacketFactoryTest extends TestCase {
         byte[] channelKeyOnion = new byte[this.channelKeys.length * EccGroup713.SYMMETRIC_KEY_LENGTH];
         byte[] payloadOnion = new byte[100];
 
-        InitPacket packet = new InitPacket(channelID, counter.asPrefix(), publicKey, channelKeyOnion, payloadOnion);
+        InitPacket packet = new InitPacket(channelID, counter.asBytes(), publicKey, channelKeyOnion, payloadOnion);
         ProcessedInitPacket processedPacket =
-                new ProcessedInitPacket(this.channelID, counter.asPrefix(), channelKey, publicKey, channelKeyOnion, payloadOnion);
+                new ProcessedInitPacket(this.channelID, counter.asBytes(), channelKey, publicKey, channelKeyOnion, payloadOnion);
 
         assertEquals(packet, processedPacket);
         assertEquals(processedPacket, packet);

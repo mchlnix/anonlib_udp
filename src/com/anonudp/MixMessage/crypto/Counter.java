@@ -40,7 +40,7 @@ public class Counter {
         ++this.currentValue;
     }
 
-    public byte[] asPrefix()
+    public byte[] asBytes()
     {
         ByteBuffer buffer = ByteBuffer.allocate(CTR_PREFIX_SIZE);
         buffer.putInt(CTR_PREFIX_OFFSET, this.currentValue);
