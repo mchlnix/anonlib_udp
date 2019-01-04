@@ -42,6 +42,6 @@ class IPv4AndPortTest extends TestCase {
     @Test
     void throwsException()
     {
-        assertThrows(UnknownHostException.class, () -> new IPv4AndPort("abc.def.ghi", 10000));
+        assertThrows(UnknownHostException.class, () -> new IPv4AndPort("-1", 10000));
     }
 }
