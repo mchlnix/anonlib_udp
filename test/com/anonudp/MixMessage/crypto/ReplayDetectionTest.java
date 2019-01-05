@@ -2,6 +2,7 @@ package com.anonudp.MixMessage.crypto;
 
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -77,4 +78,37 @@ class ReplayDetectionTest extends TestCase {
         for (int i = 0; i < lowerBound; ++i)
             assertFalse(rd.isValid(i));
     }
+
+    @DisplayName("Handles unsigned integers correctly")
+    @Test
+    void unsigned()
+    {
+        int start = Integer.MAX_VALUE - ReplayDetection.SIZE;
+
+        for (int i = start; i < Integer.MAX_VALUE; ++i)
+            rd.isValid(i);
+
+        assertTrue(rd.isValid(Integer.MAX_VALUE));
+
+        //noinspection NumericOverflow
+        assertTrue(rd.isValid(Integer.MAX_VALUE+1));
+    }
+
+    @DisplayName("Try all numbers")
+    @Test
+    @Disabled
+    void tryAll()
+    {
+        long upperBound = Integer.MAX_VALUE;
+        upperBound += Integer.MAX_VALUE;
+
+        int value = 1;
+
+        for (long i = value; i < upperBound; ++i)
+        {
+            rd.isValid(value++);
+        }
+    }
+
+
 }

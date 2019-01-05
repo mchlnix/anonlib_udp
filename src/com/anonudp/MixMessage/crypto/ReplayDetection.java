@@ -5,7 +5,7 @@ import java.util.PriorityQueue;
 public class ReplayDetection {
     public static final int SIZE = 20;
     private static final int START_VALUE = 0;
-    private PriorityQueue<Integer> alreadySeen = new PriorityQueue<>(SIZE);
+    private PriorityQueue<Integer> alreadySeen = new PriorityQueue<>(SIZE, Integer::compareUnsigned);
 
     public ReplayDetection()
     {
@@ -31,7 +31,7 @@ public class ReplayDetection {
             return false;
 
         boolean notAlreadySeen = ! alreadySeen.contains(packetID);
-        boolean notTooSmall = ! (packetID < alreadySeen.peek());
+        boolean notTooSmall = ! (Integer.compareUnsigned(packetID, alreadySeen.peek()) < 0);
 
         if (notAlreadySeen && notTooSmall)
         {
