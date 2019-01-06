@@ -2,7 +2,9 @@ package com.anonudp.MixPacket;
 
 import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.Util;
-import com.anonudp.MixMessage.crypto.*;
+import com.anonudp.MixMessage.crypto.Counter;
+import com.anonudp.MixMessage.crypto.PrivateKey;
+import com.anonudp.MixMessage.crypto.PublicKey;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -16,6 +18,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
+import static com.anonudp.Constants.MIX_SERVER_COUNT;
+import static com.anonudp.MixMessage.crypto.Counter.CTR_PREFIX_SIZE;
+import static com.anonudp.MixMessage.crypto.EccGroup713.SYMMETRIC_KEY_LENGTH;
 import static com.anonudp.MixMessage.crypto.Util.createCTRCipher;
 
 public class PacketFactory {
@@ -31,10 +36,10 @@ public class PacketFactory {
 
     public PacketFactory(byte[] channelID, byte[] initPayload, PublicKey[] publicKeys)
     {
-        this.channelKeys = new byte[publicKeys.length][EccGroup713.SYMMETRIC_KEY_LENGTH];
+        this.channelKeys = new byte[publicKeys.length][SYMMETRIC_KEY_LENGTH];
 
         for(int i = 0; i < publicKeys.length; ++i)
-            this.channelKeys[i] = Util.randomBytes(EccGroup713.SYMMETRIC_KEY_LENGTH);
+            this.channelKeys[i] = Util.randomBytes(SYMMETRIC_KEY_LENGTH);
 
         this.channelID = channelID;
         this.initPayload = initPayload;
@@ -62,13 +67,12 @@ public class PacketFactory {
 
         byte[] processedChannelOnion = cipher.update(packet.getChannelKeyOnion());
 
-        // TODO: get rid of magic numbers
-        byte[] channelKey = Arrays.copyOf(processedChannelOnion, 16);
+        byte[] channelKey = Arrays.copyOf(processedChannelOnion, SYMMETRIC_KEY_LENGTH);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        bos.write(Arrays.copyOfRange(processedChannelOnion, 16, 48));
-        bos.write(new byte[16]); // todo: make random bytes
+        bos.write(Arrays.copyOfRange(processedChannelOnion, SYMMETRIC_KEY_LENGTH, MIX_SERVER_COUNT * SYMMETRIC_KEY_LENGTH));
+        bos.write(Util.randomBytes(SYMMETRIC_KEY_LENGTH));
 
         processedChannelOnion = bos.toByteArray();
 
@@ -112,7 +116,7 @@ public class PacketFactory {
 
         /* preparing "onions" */
 
-        byte[] channelOnion = new byte[EccGroup713.SYMMETRIC_KEY_LENGTH * this.publicKeys.length];
+        byte[] channelOnion = new byte[SYMMETRIC_KEY_LENGTH * this.publicKeys.length];
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         bos.write(this.initPayload);
@@ -132,7 +136,7 @@ public class PacketFactory {
             cipher = createCTRCipher(disposableKeys[i].toSymmetricKey(), new Counter(messagePrefix).asIV(), Cipher.ENCRYPT_MODE);
 
             bos.write(this.channelKeys[i]);
-            bos.write(Arrays.copyOf(channelOnion, channelOnion.length - EccGroup713.SYMMETRIC_KEY_LENGTH));
+            bos.write(Arrays.copyOf(channelOnion, channelOnion.length - SYMMETRIC_KEY_LENGTH));
 
             channelOnion = cipher.update(bos.toByteArray());
 
@@ -145,9 +149,9 @@ public class PacketFactory {
     }
 
     public DataPacket makeDataPacket(Fragment fragment) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException, BadPaddingException, IllegalBlockSizeException {
-        byte[] encryptedData = new byte[this.mixCount * Counter.CTR_PREFIX_SIZE + Fragment.SIZE_DATA];
+        byte[] encryptedData = new byte[this.mixCount * CTR_PREFIX_SIZE + Fragment.SIZE_DATA];
 
-        System.arraycopy(fragment.toBytes(), 0, encryptedData, this.mixCount * Counter.CTR_PREFIX_SIZE, fragment.toBytes().length);
+        System.arraycopy(fragment.toBytes(), 0, encryptedData, this.mixCount * CTR_PREFIX_SIZE, fragment.toBytes().length);
 
         this.requestCounter.count();
 
@@ -155,7 +159,7 @@ public class PacketFactory {
         {
             Cipher cipher = createCTRCipher(this.channelKeys[i], this.requestCounter.asIV(), Cipher.ENCRYPT_MODE);
 
-            int dataOffset = (i+1) * Counter.CTR_PREFIX_SIZE;
+            int dataOffset = (i+1) * CTR_PREFIX_SIZE;
             int dataSize = encryptedData.length - dataOffset;
 
             byte[] tmpEncrypted = cipher.doFinal(encryptedData, dataOffset, dataSize);
@@ -163,7 +167,7 @@ public class PacketFactory {
             System.arraycopy(tmpEncrypted,0, encryptedData, dataOffset, dataSize);
 
             // prepend the counter prefix to the payload
-            System.arraycopy(requestCounter.asBytes(), 0, encryptedData, i * Counter.CTR_PREFIX_SIZE, Counter.CTR_PREFIX_SIZE);
+            System.arraycopy(requestCounter.asBytes(), 0, encryptedData, i * CTR_PREFIX_SIZE, CTR_PREFIX_SIZE);
         }
 
         return new DataPacket(this.channelID, encryptedData);

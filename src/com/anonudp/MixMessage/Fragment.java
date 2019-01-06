@@ -82,8 +82,10 @@ public class Fragment {
     }
 
     public Fragment(byte[] fragment, int length) {
-        this.bytesCached = false;
+        this.bytesCached = true;
         this.byteArrayCache = new byte[fragment.length];
+
+        System.arraycopy(fragment, 0, this.byteArrayCache, 0, fragment.length);
 
         int current_offset = 0;
 
@@ -183,6 +185,8 @@ public class Fragment {
             assert bos.size() == this.byteArrayCache.length;
 
             this.byteArrayCache = bos.toByteArray();
+
+            this.bytesCached = true;
         }
 
         return this.byteArrayCache;

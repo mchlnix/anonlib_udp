@@ -3,6 +3,7 @@ package com.anonudp.MixMessage;
 import java.util.Arrays;
 
 import static com.anonudp.MixMessage.Util.log2;
+import static com.anonudp.MixMessage.Util.randomBytes;
 
 class Padding {
     private static final int END_BIT = 0x80;
@@ -80,8 +81,7 @@ class Padding {
 
     public byte[] getPaddingBytes()
     {
-        // todo: make padding bytes random
-        return new byte[this.internal_padding_length];
+        return randomBytes(this.internal_padding_length);
     }
 
     public int getLength()

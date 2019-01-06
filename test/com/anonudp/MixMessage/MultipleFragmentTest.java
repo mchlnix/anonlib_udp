@@ -110,17 +110,17 @@ class MultipleFragmentTest extends TestCase {
     void toBytes() {
         try {
             assertEquals(Fragment.SIZE_DATA, this.fragment1.toBytes().length);
+            assertEquals(Fragment.SIZE_DATA, this.fragment2.toBytes().length);
 
             Fragment copy1 = new Fragment(this.fragment1.toBytes());
 
             assertArrayEquals(this.fragment1.toBytes(), copy1.toBytes());
 
-            assertEquals(Fragment.SIZE_DATA, this.fragment2.toBytes().length);
-
             Fragment copy2 = new Fragment(this.fragment2.toBytes());
 
             assertArrayEquals(this.fragment2.toBytes(), copy2.toBytes());
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
             fail();
         }    }
