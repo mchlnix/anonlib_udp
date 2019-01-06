@@ -2,9 +2,8 @@ package com.anonudp.MixMessage.crypto;
 
 import java.nio.ByteBuffer;
 
-public class Counter implements Comparable<Counter> {
+public class Counter {
     public static final int CTR_PREFIX_SIZE = Integer.BYTES;
-    private static final int IV_LENGTH = 16;
 
     private int currentValue;
 
@@ -43,7 +42,7 @@ public class Counter implements Comparable<Counter> {
 
     public byte[] asIV()
     {
-        ByteBuffer buffer = ByteBuffer.allocate(IV_LENGTH);
+        ByteBuffer buffer = ByteBuffer.allocate(Util.IV_SIZE);
         buffer.putInt(this.currentValue);
 
         return buffer.array();
@@ -57,10 +56,5 @@ public class Counter implements Comparable<Counter> {
         }
 
         return super.equals(obj);
-    }
-
-    @Override
-    public int compareTo(Counter counter) {
-        return 0;
     }
 }
