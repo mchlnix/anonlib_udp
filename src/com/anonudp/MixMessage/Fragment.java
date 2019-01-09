@@ -90,7 +90,7 @@ public class Fragment {
         int current_offset = 0;
 
         this.message_id = fragment[current_offset];
-        this.message_id <<= 8;
+        this.message_id <<= Byte.SIZE;
 
         ++current_offset;
 
@@ -170,7 +170,7 @@ public class Fragment {
             if (this.getPadding_length() > 0)
                 message_id_and_flags |= BIT_HAS_PADDING;
 
-            bos.write(message_id_and_flags >> 8 & 0xFF);
+            bos.write(message_id_and_flags >> Byte.SIZE & 0xFF);
             bos.write(message_id_and_flags & 0xFF);
 
             if (this.message_id != 0)

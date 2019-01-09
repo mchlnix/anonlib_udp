@@ -96,8 +96,6 @@ public class PacketFactory {
     public InitPacket makeInitPacket(Fragment fragment) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
         this.requestCounter.count();
 
-        byte[] messagePrefix = this.requestCounter.asBytes();
-
         PublicKey[] disposableKeys = new PublicKey[this.publicKeys.length];
 
         PrivateKey privateMessageKey = new PrivateKey();
@@ -105,13 +103,13 @@ public class PacketFactory {
 
         /* create shared disposable keys */
 
-        disposableKeys[0] = this.publicKeys[0].blind(privateMessageKey).blind(messagePrefix);
+        disposableKeys[0] = this.publicKeys[0].blind(privateMessageKey).blind(this.requestCounter.asBytes());
 
         for (int i = 1; i < this.publicKeys.length; ++i)
         {
             privateMessageKey = privateMessageKey.blind(disposableKeys[i-1]);
 
-            disposableKeys[i] = this.publicKeys[i].blind(privateMessageKey).blind(messagePrefix);
+            disposableKeys[i] = this.publicKeys[i].blind(privateMessageKey).blind(this.requestCounter.asBytes());
         }
 
         /* preparing "onions" */
@@ -133,7 +131,7 @@ public class PacketFactory {
 
         for (int i = disposableKeys.length - 1; i >= 0; --i)
         {
-            cipher = createCTRCipher(disposableKeys[i].toSymmetricKey(), new Counter(messagePrefix).asIV(), Cipher.ENCRYPT_MODE);
+            cipher = createCTRCipher(disposableKeys[i].toSymmetricKey(), this.requestCounter.asIV(), Cipher.ENCRYPT_MODE);
 
             bos.write(this.channelKeys[i]);
             bos.write(Arrays.copyOf(channelOnion, channelOnion.length - SYMMETRIC_KEY_LENGTH));

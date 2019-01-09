@@ -15,6 +15,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,7 +28,7 @@ TODO: Use Short for Channel-ID?
  */
 public class Channel implements Iterator<byte[]> {
     public static final int ID_SIZE = 2; // byte
-    static final int HIGHEST_ID = Double.valueOf(Math.pow(2, 8 * ID_SIZE) - 1).intValue();
+    static final int HIGHEST_ID = Double.valueOf(Math.pow(2, Byte.SIZE * ID_SIZE) - 1).intValue();
     private static final HashMap<Integer, Channel> table = new HashMap<>();
 
     private PacketFactory packetFactory;

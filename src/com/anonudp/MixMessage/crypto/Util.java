@@ -34,7 +34,7 @@ public class Util {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC");
 
         SecretKeySpec keySpec = new SecretKeySpec(symmetricKey, "AES");
-        GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_MAC_SIZE * 8, iv);
+        GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_MAC_SIZE * Byte.SIZE, iv);
 
         cipher.init(mode, keySpec, gcmSpec);
 
