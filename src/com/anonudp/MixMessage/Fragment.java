@@ -1,7 +1,5 @@
 package com.anonudp.MixMessage;
 
-import com.anonudp.MixMessage.crypto.Counter;
-import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.PublicKey;
 import com.anonudp.MixPacket.InitPacket;
 
@@ -10,10 +8,12 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import static com.anonudp.Constants.MIX_SERVER_COUNT;
+import static com.anonudp.MixMessage.crypto.Counter.CTR_PREFIX_SIZE;
+import static com.anonudp.MixPacket.InitPacket.CHANNEL_KEY_ONION_SIZE;
 
 public class Fragment {
-    public static final int DATA_OVERHEAD = (MIX_SERVER_COUNT - 1) * Counter.CTR_PREFIX_SIZE;
-    private static final int INIT_OVERHEAD = PublicKey.SIZE + MIX_SERVER_COUNT * EccGroup713.SYMMETRIC_KEY_LENGTH + InitPacket.PAYLOAD_SIZE;
+    public static final int DATA_OVERHEAD = (MIX_SERVER_COUNT-1) * CTR_PREFIX_SIZE;
+    private static final int INIT_OVERHEAD = PublicKey.SIZE + CHANNEL_KEY_ONION_SIZE + InitPacket.PAYLOAD_SIZE;
 
     private static final int DUMMY_PAYLOAD_SIZE = 0;
     public static final int DATA_PAYLOAD_SIZE = 274;

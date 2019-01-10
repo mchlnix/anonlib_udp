@@ -107,7 +107,7 @@ public class Channel implements Iterator<byte[]> {
         else {
             DataPacket packet = (DataPacket) plainText;
 
-            for (byte[] channelKey: this.packetFactory.getChannelKeys())
+            for (byte[] channelKey: this.packetFactory.getResponseChannelKeys())
             {
                 packet = packetFactory.process(packet, channelKey);
             }

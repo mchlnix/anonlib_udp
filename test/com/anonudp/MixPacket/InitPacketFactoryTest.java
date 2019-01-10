@@ -3,7 +3,6 @@ package com.anonudp.MixPacket;
 import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.Util;
 import com.anonudp.MixMessage.crypto.Counter;
-import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.PrivateKey;
 import com.anonudp.MixMessage.crypto.PublicKey;
 import junit.framework.TestCase;
@@ -21,6 +20,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
+import static com.anonudp.MixMessage.crypto.EccGroup713.SYMMETRIC_KEY_LENGTH;
+import static com.anonudp.MixPacket.InitPacket.CHANNEL_KEY_ONION_SIZE;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -32,8 +33,6 @@ class InitPacketFactoryTest extends TestCase {
     private byte[] channelID;
 
     private Counter counter;
-
-    private byte[][] channelKeys;
 
     private byte[] initPayload;
 
@@ -57,14 +56,10 @@ class InitPacketFactoryTest extends TestCase {
         this.privateMixKeys = new PrivateKey[mixCount];
         PublicKey[] publicMixKeys = new PublicKey[mixCount];
 
-        this.channelKeys = new byte[mixCount][EccGroup713.SYMMETRIC_KEY_LENGTH];
-
         for (int i = 0; i < publicMixKeys.length; ++i)
         {
             this.privateMixKeys[i] = new PrivateKey();
             publicMixKeys[i] = new PublicKey(this.privateMixKeys[i]);
-
-            this.channelKeys[i] = Util.randomBytes(EccGroup713.SYMMETRIC_KEY_LENGTH);
         }
 
         this.factory = new PacketFactory(channelID, initPayload, publicMixKeys);
@@ -91,7 +86,8 @@ class InitPacketFactoryTest extends TestCase {
             {
                 packet = this.factory.process(packet, this.privateMixKeys[i]);
 
-                assertArrayEquals(this.factory.getChannelKeys()[i], ((ProcessedInitPacket) packet).getChannelKey());
+                assertArrayEquals(this.factory.getRequestChannelKeys()[i], ((ProcessedInitPacket) packet).getRequestChannelKey());
+                assertArrayEquals(this.factory.getResponseChannelKeys()[i], ((ProcessedInitPacket) packet).getResponseChannelKey());
             }
 
             byte[] initSpecific = Arrays.copyOf(packet.getPayloadOnion(), this.initPayload.length);
@@ -112,13 +108,16 @@ class InitPacketFactoryTest extends TestCase {
         PrivateKey privateKey = new PrivateKey();
         PublicKey publicKey = new PublicKey(privateKey);
 
-        byte[] channelKey = new byte[EccGroup713.SYMMETRIC_KEY_LENGTH];
-        byte[] channelKeyOnion = new byte[this.channelKeys.length * EccGroup713.SYMMETRIC_KEY_LENGTH];
+        byte[] requestChannelKey = new byte[SYMMETRIC_KEY_LENGTH];
+        byte[] responseChannelKey = new byte[SYMMETRIC_KEY_LENGTH];
+
+        byte[] channelKeyOnion = new byte[CHANNEL_KEY_ONION_SIZE];
+
         byte[] payloadOnion = new byte[100];
 
         InitPacket packet = new InitPacket(channelID, counter.asBytes(), publicKey, channelKeyOnion, payloadOnion);
         ProcessedInitPacket processedPacket =
-                new ProcessedInitPacket(this.channelID, counter.asBytes(), channelKey, publicKey, channelKeyOnion, payloadOnion);
+                new ProcessedInitPacket(this.channelID, counter.asBytes(), requestChannelKey, responseChannelKey, publicKey, channelKeyOnion, payloadOnion);
 
         assertEquals(packet, processedPacket);
         assertEquals(processedPacket, packet);

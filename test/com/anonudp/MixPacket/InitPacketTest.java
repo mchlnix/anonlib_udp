@@ -46,7 +46,7 @@ class InitPacketTest extends TestCase {
 
         assertEquals(original, copied);
 
-        ProcessedInitPacket processed = new ProcessedInitPacket(original.getChannelID(), original.getCTRPrefix(), /* is ignored: */ new byte[16], original.getPublicKey(), original.getChannelKeyOnion(), original.getPayloadOnion());
+        ProcessedInitPacket processed = new ProcessedInitPacket(original.getChannelID(), original.getCTRPrefix(), /* is ignored: */ new byte[16], /* is ignored: */ new byte[16], original.getPublicKey(), original.getChannelKeyOnion(), original.getPayloadOnion());
 
         assertEquals(original, processed);
     }
@@ -77,7 +77,7 @@ class InitPacketTest extends TestCase {
 
         assertNotEquals(original, fake);
 
-        ProcessedInitPacket fakeProcessed = new ProcessedInitPacket(original.getChannelID(), fakePrefix, /* is ignored: */ new byte[16], original.getPublicKey(), original.getChannelKeyOnion(), original.getPayloadOnion());
+        ProcessedInitPacket fakeProcessed = new ProcessedInitPacket(original.getChannelID(), fakePrefix, /* is ignored: */ new byte[16], /* is ignored: */ new byte[16], original.getPublicKey(), original.getChannelKeyOnion(), original.getPayloadOnion());
 
         assertNotEquals(original, fakeProcessed);
     }

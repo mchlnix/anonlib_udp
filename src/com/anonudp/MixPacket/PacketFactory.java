@@ -18,17 +18,18 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
-import static com.anonudp.Constants.MIX_SERVER_COUNT;
 import static com.anonudp.MixMessage.crypto.Counter.CTR_PREFIX_SIZE;
 import static com.anonudp.MixMessage.crypto.EccGroup713.SYMMETRIC_KEY_LENGTH;
 import static com.anonudp.MixMessage.crypto.Util.createCTRCipher;
+import static com.anonudp.MixPacket.InitPacket.CHANNEL_KEY_ONION_SIZE;
 
 public class PacketFactory {
     private final byte[] channelID;
     private final byte[] initPayload;
 
     private PublicKey[] publicKeys;
-    private byte[][] channelKeys;
+    private byte[][] requestChannelKeys;
+    private byte[][] responseChannelKeys;
 
     private int mixCount;
     private Counter requestCounter;
@@ -36,10 +37,14 @@ public class PacketFactory {
 
     public PacketFactory(byte[] channelID, byte[] initPayload, PublicKey[] publicKeys)
     {
-        this.channelKeys = new byte[publicKeys.length][SYMMETRIC_KEY_LENGTH];
+        this.requestChannelKeys = new byte[publicKeys.length][SYMMETRIC_KEY_LENGTH];
+        this.responseChannelKeys = new byte[publicKeys.length][SYMMETRIC_KEY_LENGTH];
 
-        for(int i = 0; i < publicKeys.length; ++i)
-            this.channelKeys[i] = Util.randomBytes(SYMMETRIC_KEY_LENGTH);
+
+        for(int i = 0; i < publicKeys.length; ++i) {
+            this.requestChannelKeys[i] = Util.randomBytes(SYMMETRIC_KEY_LENGTH);
+            this.responseChannelKeys[i] = Util.randomBytes(SYMMETRIC_KEY_LENGTH);
+        }
 
         this.channelID = channelID;
         this.initPayload = initPayload;
@@ -67,12 +72,15 @@ public class PacketFactory {
 
         byte[] processedChannelOnion = cipher.update(packet.getChannelKeyOnion());
 
-        byte[] channelKey = Arrays.copyOf(processedChannelOnion, SYMMETRIC_KEY_LENGTH);
+
+        // TODO make prettier with all the offsets
+        byte[] requestChannelKey = Arrays.copyOf(processedChannelOnion, SYMMETRIC_KEY_LENGTH);
+        byte[] responseChannelKey = Arrays.copyOfRange(processedChannelOnion, SYMMETRIC_KEY_LENGTH, 2 * SYMMETRIC_KEY_LENGTH);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        bos.write(Arrays.copyOfRange(processedChannelOnion, SYMMETRIC_KEY_LENGTH, MIX_SERVER_COUNT * SYMMETRIC_KEY_LENGTH));
-        bos.write(Util.randomBytes(SYMMETRIC_KEY_LENGTH));
+        bos.write(Arrays.copyOfRange(processedChannelOnion, 2 * SYMMETRIC_KEY_LENGTH, CHANNEL_KEY_ONION_SIZE));
+        bos.write(Util.randomBytes(2 * SYMMETRIC_KEY_LENGTH));
 
         processedChannelOnion = bos.toByteArray();
 
@@ -82,7 +90,7 @@ public class PacketFactory {
 
         PublicKey newElement = packet.getPublicKey().blind(disposableKey);
 
-        return new ProcessedInitPacket(this.channelID, packet.getCTRPrefix(), channelKey, newElement, processedChannelOnion, processedPayloadOnion);
+        return new ProcessedInitPacket(this.channelID, packet.getCTRPrefix(), requestChannelKey, responseChannelKey, newElement, processedChannelOnion, processedPayloadOnion);
     }
 
     public ProcessedDataPacket process(DataPacket packet, byte[] channelKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, InvalidAlgorithmParameterException, BadPaddingException, IllegalBlockSizeException {
@@ -114,7 +122,7 @@ public class PacketFactory {
 
         /* preparing "onions" */
 
-        byte[] channelOnion = new byte[SYMMETRIC_KEY_LENGTH * this.publicKeys.length];
+        byte[] channelOnion = new byte[CHANNEL_KEY_ONION_SIZE];
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         bos.write(this.initPayload);
@@ -133,8 +141,9 @@ public class PacketFactory {
         {
             cipher = createCTRCipher(disposableKeys[i].toSymmetricKey(), this.requestCounter.asIV(), Cipher.ENCRYPT_MODE);
 
-            bos.write(this.channelKeys[i]);
-            bos.write(Arrays.copyOf(channelOnion, channelOnion.length - SYMMETRIC_KEY_LENGTH));
+            bos.write(this.requestChannelKeys[i]);
+            bos.write(this.responseChannelKeys[i]);
+            bos.write(Arrays.copyOf(channelOnion, channelOnion.length - 2 * SYMMETRIC_KEY_LENGTH));
 
             channelOnion = cipher.update(bos.toByteArray());
 
@@ -155,7 +164,7 @@ public class PacketFactory {
 
         for(int i = this.mixCount - 1; i >= 0 ; --i)
         {
-            Cipher cipher = createCTRCipher(this.channelKeys[i], this.requestCounter.asIV(), Cipher.ENCRYPT_MODE);
+            Cipher cipher = createCTRCipher(this.requestChannelKeys[i], this.requestCounter.asIV(), Cipher.ENCRYPT_MODE);
 
             int dataOffset = (i+1) * CTR_PREFIX_SIZE;
             int dataSize = encryptedData.length - dataOffset;
@@ -171,8 +180,12 @@ public class PacketFactory {
         return new DataPacket(this.channelID, encryptedData);
     }
 
-    public byte[][] getChannelKeys() {
-        return channelKeys;
+    public byte[][] getRequestChannelKeys() {
+        return requestChannelKeys;
+    }
+
+    public byte[][] getResponseChannelKeys() {
+        return responseChannelKeys;
     }
 
     public byte[] getChannelID() {

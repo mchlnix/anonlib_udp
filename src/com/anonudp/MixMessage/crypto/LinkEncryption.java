@@ -2,9 +2,8 @@ package com.anonudp.MixMessage.crypto;
 
 import com.anonudp.MixChannel.Channel;
 import com.anonudp.MixPacket.DataPacket;
-import com.anonudp.MixPacket.InitPacket;
-import com.anonudp.MixPacket.InitResponse;
 import com.anonudp.MixPacket.IPacket;
+import com.anonudp.MixPacket.InitResponse;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -82,8 +81,6 @@ public class LinkEncryption {
 
         if (messageType == IPacket.TYPE_DATA)
             returnPacket = new DataPacket(channelID, messagePrefix, payload);
-        else if (messageType == IPacket.TYPE_INIT)
-            returnPacket = new InitPacket(channelID, messagePrefix, payload);
         else if (messageType == IPacket.TYPE_INIT_RESPONSE)
             returnPacket = new InitResponse(channelID, payload);
 

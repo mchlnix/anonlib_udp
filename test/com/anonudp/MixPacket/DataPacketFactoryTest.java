@@ -3,9 +3,6 @@ package com.anonudp.MixPacket;
 import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.Util;
 import com.anonudp.MixMessage.crypto.PublicKey;
-import com.anonudp.MixPacket.DataPacket;
-import com.anonudp.MixPacket.PacketFactory;
-import com.anonudp.MixPacket.ProcessedDataPacket;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,7 +60,7 @@ class DataPacketFactoryTest extends TestCase {
         }
 
         try {
-            for (byte[] channelKey : this.factory.getChannelKeys()) {
+            for (byte[] channelKey : this.factory.getRequestChannelKeys()) {
                 packet = this.factory.process(packet, channelKey);
             }
 

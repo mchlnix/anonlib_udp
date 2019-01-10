@@ -4,18 +4,23 @@ import com.anonudp.MixMessage.crypto.PublicKey;
 
 public class ProcessedInitPacket extends InitPacket
 {
-    private final byte[] channelKey;
+    private final byte[] requestChannelKey;
+    private final byte[] responseChannelKey;
 
-    public ProcessedInitPacket(byte[] channelID, byte[] counterPrefix, byte[] channelKey, PublicKey element, byte[] processedChannelOnion, byte[] processedPayloadOnion)
+    public ProcessedInitPacket(byte[] channelID, byte[] counterPrefix, byte[] requestChannelKey, byte[] responseChannelKey, PublicKey element, byte[] processedChannelOnion, byte[] processedPayloadOnion)
     {
         super(channelID, counterPrefix, element, processedChannelOnion, processedPayloadOnion);
 
-        this.channelKey = channelKey;
+        this.requestChannelKey = requestChannelKey;
+        this.responseChannelKey = responseChannelKey;
     }
 
-    public byte[] getChannelKey()
-    {
-        return this.channelKey;
+    public byte[] getRequestChannelKey() {
+        return requestChannelKey;
+    }
+
+    public byte[] getResponseChannelKey() {
+        return responseChannelKey;
     }
 
     @Override
