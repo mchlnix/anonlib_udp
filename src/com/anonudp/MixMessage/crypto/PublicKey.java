@@ -54,7 +54,7 @@ public class PublicKey
         return this.blind(blindingFactor);
     }
 
-    public PublicKey blind(byte[] messageCounterPrefix) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
+    public PublicKey blind(byte[] messageCounterPrefix) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException {
         byte[] iv = new Counter(messageCounterPrefix).asIV();
         BlindingFactor blindingFactor = new BlindingFactor(iv);
 

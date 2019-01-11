@@ -5,7 +5,7 @@ import java.util.PriorityQueue;
 public class ReplayDetection {
     public static final int SIZE = 20;
     private static final int START_VALUE = 0;
-    private PriorityQueue<Integer> alreadySeen = new PriorityQueue<>(SIZE, Integer::compareUnsigned);
+    private final PriorityQueue<Integer> alreadySeen = new PriorityQueue<>(SIZE, Integer::compareUnsigned);
 
     public ReplayDetection()
     {

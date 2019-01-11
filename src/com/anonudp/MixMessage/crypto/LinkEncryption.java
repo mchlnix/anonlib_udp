@@ -61,9 +61,9 @@ public class LinkEncryption {
         byte[] cipherTextAndMac = new byte[HEADER_SIZE + GCM_MAC_SIZE];
         byte[] payload = new byte[packetBytes.length - OVERHEAD];
 
-        bis.read(linkCounter);
-        bis.read(cipherTextAndMac);
-        bis.read(payload);
+        assert bis.read(linkCounter) == linkCounter.length;
+        assert bis.read(cipherTextAndMac) == cipherTextAndMac.length;
+        assert bis.read(payload) == payload.length;
 
         bis.close();
 
@@ -75,8 +75,9 @@ public class LinkEncryption {
         byte[] messagePrefix = new byte[Counter.CTR_PREFIX_SIZE];
         byte messageType;
 
-        bis.read(channelID);
-        bis.read(messagePrefix);
+        assert bis.read(channelID) == channelID.length;
+        assert bis.read(messagePrefix) == messagePrefix.length;
+
         messageType = (byte) bis.read();
 
         IPacket returnPacket = null;

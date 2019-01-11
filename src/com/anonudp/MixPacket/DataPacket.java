@@ -10,8 +10,8 @@ public class DataPacket implements IPacket
     public static final int SIZE = DATA_OVERHEAD + SIZE_DATA;
     private final byte[] channelID;
 
-    private byte[] ctrPrefix;
-    private byte[] encryptedData;
+    private final byte[] ctrPrefix;
+    private final byte[] encryptedData;
 
     public DataPacket(byte[] channelID, byte[] ctrPrefix, byte[] payload) {
         this.channelID = channelID;

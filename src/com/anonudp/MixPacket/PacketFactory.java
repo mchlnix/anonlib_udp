@@ -28,8 +28,8 @@ public class PacketFactory {
     private final byte[] initPayload;
 
     private PublicKey[] publicKeys;
-    private byte[][] requestChannelKeys;
-    private byte[][] responseChannelKeys;
+    private final byte[][] requestChannelKeys;
+    private final byte[][] responseChannelKeys;
 
     private int mixCount;
     private Counter requestCounter;
@@ -78,9 +78,9 @@ public class PacketFactory {
 
         ByteArrayInputStream bis = new ByteArrayInputStream(processedChannelOnion);
 
-        bis.read(requestChannelKey);
-        bis.read(responseChannelKey);
-        bis.read(encryptedChannelOnion);
+        assert bis.read(requestChannelKey) == requestChannelKey.length;
+        assert bis.read(responseChannelKey) == responseChannelKey.length;
+        assert bis.read(encryptedChannelOnion) == encryptedChannelOnion.length;
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 

@@ -16,7 +16,7 @@ public class InitPacket implements IPacket
     public static final int PAYLOAD_SIZE = IPv4AndPort.SIZE;
 
     private final byte[] channelID;
-    private byte[] counterPrefix;
+    private final byte[] counterPrefix;
 
     private final PublicKey publicKey;
     private final byte[] channelKeyOnion;
