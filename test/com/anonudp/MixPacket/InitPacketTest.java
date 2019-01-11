@@ -42,11 +42,11 @@ class InitPacketTest extends TestCase {
 
         InitPacket original = factory.makeInitPacket(fragment);
 
-        InitPacket copied = new InitPacket(original.getChannelID(), original.getCTRPrefix(), original.getPublicKey(), original.getChannelKeyOnion(), original.getPayloadOnion());
+        InitPacket copied = new InitPacket(original.getChannelID(), original.getMessageID(), original.getPublicKey(), original.getChannelKeyOnion(), original.getPayloadOnion());
 
         assertEquals(original, copied);
 
-        ProcessedInitPacket processed = new ProcessedInitPacket(original.getChannelID(), original.getCTRPrefix(), /* is ignored: */ new byte[16], /* is ignored: */ new byte[16], original.getPublicKey(), original.getChannelKeyOnion(), original.getPayloadOnion());
+        ProcessedInitPacket processed = new ProcessedInitPacket(original.getChannelID(), original.getMessageID(), /* is ignored: */ new byte[16], /* is ignored: */ new byte[16], original.getPublicKey(), original.getChannelKeyOnion(), original.getPayloadOnion());
 
         assertEquals(original, processed);
     }
@@ -71,7 +71,7 @@ class InitPacketTest extends TestCase {
 
         InitPacket original = factory.makeInitPacket(fragment);
 
-        byte[] fakePrefix = new byte[Counter.CTR_PREFIX_SIZE];
+        byte[] fakePrefix = new byte[Counter.SIZE];
 
         InitPacket fake = new InitPacket(original.getChannelID(), fakePrefix, original.getPublicKey(), original.getChannelKeyOnion(), original.getPayloadOnion());
 

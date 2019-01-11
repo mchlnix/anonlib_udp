@@ -7,9 +7,9 @@ public class ProcessedInitPacket extends InitPacket
     private final byte[] requestChannelKey;
     private final byte[] responseChannelKey;
 
-    public ProcessedInitPacket(byte[] channelID, byte[] counterPrefix, byte[] requestChannelKey, byte[] responseChannelKey, PublicKey element, byte[] processedChannelOnion, byte[] processedPayloadOnion)
+    public ProcessedInitPacket(byte[] channelID, byte[] messageID, byte[] requestChannelKey, byte[] responseChannelKey, PublicKey element, byte[] processedChannelOnion, byte[] processedPayloadOnion)
     {
-        super(channelID, counterPrefix, element, processedChannelOnion, processedPayloadOnion);
+        super(channelID, messageID, element, processedChannelOnion, processedPayloadOnion);
 
         this.requestChannelKey = requestChannelKey;
         this.responseChannelKey = responseChannelKey;

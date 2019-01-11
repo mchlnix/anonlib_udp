@@ -10,7 +10,7 @@ public interface IPacket {
 
     byte getPacketType();
 
-    byte[] getCTRPrefix();
+    byte[] getMessageID();
 
     byte[] getChannelID();
 

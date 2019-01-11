@@ -16,17 +16,17 @@ public class InitPacket implements IPacket
     public static final int PAYLOAD_SIZE = IPv4AndPort.SIZE;
 
     private final byte[] channelID;
-    private final byte[] counterPrefix;
+    private final byte[] messageID;
 
     private final PublicKey publicKey;
     private final byte[] channelKeyOnion;
     private final byte[] payloadOnion;
 
-    public InitPacket(byte[] channelID, byte[] counterPrefix, PublicKey publicKey, byte[] channelKeyOnion, byte[] payloadOnion)
+    public InitPacket(byte[] channelID, byte[] messageID, PublicKey publicKey, byte[] channelKeyOnion, byte[] payloadOnion)
     {
         this.channelID = channelID;
 
-        this.counterPrefix = counterPrefix;
+        this.messageID = messageID;
 
         this.publicKey = publicKey;
         this.channelKeyOnion = channelKeyOnion;
@@ -63,8 +63,8 @@ public class InitPacket implements IPacket
     }
 
     @Override
-    public byte[] getCTRPrefix() {
-        return this.counterPrefix;
+    public byte[] getMessageID() {
+        return this.messageID;
     }
 
     @Override
@@ -88,7 +88,7 @@ public class InitPacket implements IPacket
     boolean equals(InitPacket otherPacket)
     {
         boolean is_equal = Arrays.equals(this.channelID, otherPacket.getChannelID());
-        is_equal = is_equal && Arrays.equals(this.counterPrefix, otherPacket.getCTRPrefix());
+        is_equal = is_equal && Arrays.equals(this.messageID, otherPacket.getMessageID());
         is_equal = is_equal && this.publicKey == otherPacket.getPublicKey();
         is_equal = is_equal && this.channelKeyOnion == otherPacket.getChannelKeyOnion();
         is_equal = is_equal &&  this.payloadOnion == otherPacket.getPayloadOnion();

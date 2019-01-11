@@ -98,7 +98,7 @@ public class Channel implements Iterator<byte[]> {
     public void response(byte[] data) throws IOException, NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException {
         IPacket plainText = this.linkCrypt.decrypt(data);
 
-        if (! this.responseReplay.isValid(plainText.getCTRPrefix()))
+        if (! this.responseReplay.isValid(plainText.getMessageID()))
             throw new IllegalStateException("Response Replay detected.");
 
         if (plainText.getPacketType() == IPacket.TYPE_INIT_RESPONSE) {

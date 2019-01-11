@@ -3,8 +3,8 @@ package com.anonudp.MixPacket;
 public class ProcessedDataPacket extends DataPacket
 {
 
-    public ProcessedDataPacket(byte[] channelID, byte[] ctrPrefix, byte[] fragment) {
-        super(channelID, ctrPrefix, fragment);
+    public ProcessedDataPacket(byte[] channelID, byte[] messageID, byte[] fragment) {
+        super(channelID, messageID, fragment);
     }
 
     @Override

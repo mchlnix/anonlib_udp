@@ -147,7 +147,7 @@ class InitPacketFactoryTest extends TestCase {
 
         // make fake packet
 
-        byte[] fakePrefix = new byte[Counter.CTR_PREFIX_SIZE];
+        byte[] fakePrefix = new byte[Counter.SIZE];
 
         InitPacket fake = new InitPacket(original.getChannelID(), fakePrefix, original.getPublicKey(), original.getChannelKeyOnion(), original.getPayloadOnion());
 
@@ -160,7 +160,7 @@ class InitPacketFactoryTest extends TestCase {
 
         assertArrayEquals(processedOriginal.getChannelID(), processedFake.getChannelID());
 
-        assertFalse(Arrays.equals(processedOriginal.getCTRPrefix(), processedFake.getCTRPrefix()));
+        assertFalse(Arrays.equals(processedOriginal.getMessageID(), processedFake.getMessageID()));
 
         assertFalse(Arrays.equals(processedOriginal.getChannelKeyOnion(), processedFake.getChannelKeyOnion()));
         assertFalse(Arrays.equals(processedOriginal.getPayloadOnion(), processedFake.getPayloadOnion()));

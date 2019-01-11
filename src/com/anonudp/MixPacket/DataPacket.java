@@ -10,20 +10,20 @@ public class DataPacket implements IPacket
     public static final int SIZE = DATA_OVERHEAD + SIZE_DATA;
     private final byte[] channelID;
 
-    private final byte[] ctrPrefix;
+    private final byte[] messageID;
     private final byte[] encryptedData;
 
-    public DataPacket(byte[] channelID, byte[] ctrPrefix, byte[] payload) {
+    public DataPacket(byte[] channelID, byte[] messageID, byte[] payload) {
         this.channelID = channelID;
 
-        this.ctrPrefix = ctrPrefix;
+        this.messageID = messageID;
         this.encryptedData = payload;
     }
 
     @Override
-    public byte[] getCTRPrefix()
+    public byte[] getMessageID()
     {
-        return this.ctrPrefix;
+        return this.messageID;
     }
 
     @Override

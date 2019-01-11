@@ -20,8 +20,8 @@ import java.security.NoSuchProviderException;
 import static com.anonudp.MixMessage.crypto.Util.GCM_MAC_SIZE;
 
 public class LinkEncryption {
-    private static final int HEADER_SIZE = Channel.ID_SIZE + Counter.CTR_PREFIX_SIZE + IPacket.TYPE_BYTE_SIZE;
-    public static final int OVERHEAD = Counter.CTR_PREFIX_SIZE + HEADER_SIZE + GCM_MAC_SIZE;
+    private static final int HEADER_SIZE = Channel.ID_SIZE + Counter.SIZE + IPacket.TYPE_BYTE_SIZE;
+    public static final int OVERHEAD = Counter.SIZE + HEADER_SIZE + GCM_MAC_SIZE;
 
     private final byte[] key;
     private final Counter counter;
@@ -42,7 +42,7 @@ public class LinkEncryption {
         bos.write(this.counter.asBytes());
 
         gcm.update(packet.getChannelID());
-        gcm.update(packet.getCTRPrefix());
+        gcm.update(packet.getMessageID());
         bos.write(gcm.doFinal(new byte[]{packet.getPacketType()}));
 
         bos.write(packet.getData());
@@ -57,7 +57,7 @@ public class LinkEncryption {
 
         ByteArrayInputStream bis = new ByteArrayInputStream(packetBytes);
 
-        byte[] linkCounter = new byte[Counter.CTR_PREFIX_SIZE];
+        byte[] linkCounter = new byte[Counter.SIZE];
         byte[] cipherTextAndMac = new byte[HEADER_SIZE + GCM_MAC_SIZE];
         byte[] payload = new byte[packetBytes.length - OVERHEAD];
 
@@ -72,7 +72,7 @@ public class LinkEncryption {
         bis = new ByteArrayInputStream(plainLinkHeader);
 
         byte[] channelID = new byte[Channel.ID_SIZE];
-        byte[] messagePrefix = new byte[Counter.CTR_PREFIX_SIZE];
+        byte[] messagePrefix = new byte[Counter.SIZE];
         byte messageType;
 
         assert bis.read(channelID) == channelID.length;

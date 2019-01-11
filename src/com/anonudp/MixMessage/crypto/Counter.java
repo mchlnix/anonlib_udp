@@ -3,7 +3,7 @@ package com.anonudp.MixMessage.crypto;
 import java.nio.ByteBuffer;
 
 public class Counter {
-    public static final int CTR_PREFIX_SIZE = Integer.BYTES;
+    public static final int SIZE = Integer.BYTES;
 
     private int currentValue;
 
@@ -34,7 +34,7 @@ public class Counter {
 
     public byte[] asBytes()
     {
-        ByteBuffer buffer = ByteBuffer.allocate(CTR_PREFIX_SIZE);
+        ByteBuffer buffer = ByteBuffer.allocate(SIZE);
         buffer.putInt(this.currentValue);
 
         return buffer.array();

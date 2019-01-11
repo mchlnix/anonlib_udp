@@ -22,7 +22,7 @@ public class InitResponse implements IPacket {
     }
 
     @Override
-    public byte[] getCTRPrefix() {
+    public byte[] getMessageID() {
         return this.prefix;
     }
 

@@ -62,13 +62,13 @@ public class PacketFactory {
     public ProcessedInitPacket process(InitPacket packet, PrivateKey privateKey) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException {
 
         /* create shared key, originally used to encrypt */
-        PublicKey disposableKey = packet.getPublicKey().blind(privateKey).blind(packet.getCTRPrefix());
+        PublicKey disposableKey = packet.getPublicKey().blind(privateKey).blind(packet.getMessageID());
 
         byte[] symmetricDisposableKey = disposableKey.toSymmetricKey();
 
         /* decrypt channel key and payload */
 
-        Cipher cipher = createCTRCipher(symmetricDisposableKey, new Counter(packet.getCTRPrefix()).asIV(), Cipher.DECRYPT_MODE);
+        Cipher cipher = createCTRCipher(symmetricDisposableKey, new Counter(packet.getMessageID()).asIV(), Cipher.DECRYPT_MODE);
 
         byte[] processedChannelOnion = cipher.update(packet.getChannelKeyOnion());
 
@@ -95,15 +95,15 @@ public class PacketFactory {
 
         PublicKey newElement = packet.getPublicKey().blind(disposableKey);
 
-        return new ProcessedInitPacket(this.channelID, packet.getCTRPrefix(), requestChannelKey, responseChannelKey, newElement, processedChannelOnion, processedPayloadOnion);
+        return new ProcessedInitPacket(this.channelID, packet.getMessageID(), requestChannelKey, responseChannelKey, newElement, processedChannelOnion, processedPayloadOnion);
     }
 
     public ProcessedDataPacket process(DataPacket packet, byte[] channelKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, InvalidAlgorithmParameterException, BadPaddingException, IllegalBlockSizeException {
-        Counter counter = new Counter(packet.getCTRPrefix());
+        Counter counter = new Counter(packet.getMessageID());
 
         Cipher cipher = createCTRCipher(channelKey, counter.asIV(), Cipher.DECRYPT_MODE);
 
-        return new ProcessedDataPacket(packet.getChannelID(), packet.getCTRPrefix(), cipher.doFinal(packet.getData()));
+        return new ProcessedDataPacket(packet.getChannelID(), packet.getMessageID(), cipher.doFinal(packet.getData()));
     }
 
     public InitPacket makeInitPacket(Fragment fragment) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
