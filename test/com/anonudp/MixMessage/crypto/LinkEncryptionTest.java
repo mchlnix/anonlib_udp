@@ -43,6 +43,8 @@ class LinkEncryptionTest extends TestCase {
 
         byte[] linkEncryptedPacket = linkCrypt.encrypt(packet);
 
+        assertEquals((LinkEncryption.OVERHEAD + Fragment.SIZE_DATA), linkEncryptedPacket.length);
+
         IPacket decryptedPacket = linkCrypt.decrypt(linkEncryptedPacket);
 
         assertEquals(packet, decryptedPacket);

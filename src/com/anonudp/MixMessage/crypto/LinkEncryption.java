@@ -16,13 +16,12 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.Arrays;
 
-import static com.anonudp.MixMessage.Util.randomBytes;
+import static com.anonudp.MixMessage.crypto.Util.GCM_MAC_SIZE;
 
 public class LinkEncryption {
-    public static final int OVERHEAD = Counter.CTR_PREFIX_SIZE + Util.GCM_BLOCK_SIZE + Util.GCM_MAC_SIZE;
-    private static final int RESERVED = Util.GCM_BLOCK_SIZE - Channel.ID_SIZE - Counter.CTR_PREFIX_SIZE - IPacket.TYPE_BYTE_SIZE;
+    private static final int HEADER_SIZE = Channel.ID_SIZE + Counter.CTR_PREFIX_SIZE + IPacket.TYPE_BYTE_SIZE;
+    public static final int OVERHEAD = Counter.CTR_PREFIX_SIZE + HEADER_SIZE + GCM_MAC_SIZE;
 
     private final byte[] key;
     private final Counter counter;
@@ -44,9 +43,7 @@ public class LinkEncryption {
 
         gcm.update(packet.getChannelID());
         gcm.update(packet.getCTRPrefix());
-        gcm.update(new byte[]{packet.getPacketType()});
-
-        bos.write(gcm.doFinal(randomBytes(RESERVED)));
+        bos.write(gcm.doFinal(new byte[]{packet.getPacketType()}));
 
         bos.write(packet.getData());
 
@@ -58,23 +55,28 @@ public class LinkEncryption {
 
         Cipher gcm = Util.createGCM(this.key, linkPrefix.asIV(), Cipher.DECRYPT_MODE);
 
-        // todo make constants
-        byte[] cipherTextAndMac = Arrays.copyOfRange(packetBytes, Counter.CTR_PREFIX_SIZE, Counter.CTR_PREFIX_SIZE + gcm.getBlockSize() + Util.GCM_MAC_SIZE);
+        ByteArrayInputStream bis = new ByteArrayInputStream(packetBytes);
 
-        byte[] payload = Arrays.copyOfRange(packetBytes, Counter.CTR_PREFIX_SIZE + gcm.getBlockSize() + Util.GCM_MAC_SIZE, packetBytes.length);
+        byte[] linkCounter = new byte[Counter.CTR_PREFIX_SIZE];
+        byte[] cipherTextAndMac = new byte[HEADER_SIZE + GCM_MAC_SIZE];
+        byte[] payload = new byte[packetBytes.length - OVERHEAD];
 
-        byte[] plainText = gcm.doFinal(cipherTextAndMac);
+        bis.read(linkCounter);
+        bis.read(cipherTextAndMac);
+        bis.read(payload);
 
-        // todo make constants
+        bis.close();
 
-        ByteArrayInputStream bis = new ByteArrayInputStream(plainText);
+        byte[] plainLinkHeader = gcm.doFinal(cipherTextAndMac);
+
+        bis = new ByteArrayInputStream(plainLinkHeader);
 
         byte[] channelID = new byte[Channel.ID_SIZE];
         byte[] messagePrefix = new byte[Counter.CTR_PREFIX_SIZE];
         byte messageType;
 
-        bis.read(channelID, 0, channelID.length);
-        bis.read(messagePrefix, 0, messagePrefix.length);
+        bis.read(channelID);
+        bis.read(messagePrefix);
         messageType = (byte) bis.read();
 
         IPacket returnPacket = null;
