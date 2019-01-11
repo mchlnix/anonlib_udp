@@ -1,8 +1,5 @@
 package com.anonudp.MixPacket;
 
-import com.anonudp.MixMessage.crypto.Counter;
-
-import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
 import static com.anonudp.MixMessage.Fragment.DATA_OVERHEAD;
@@ -13,44 +10,19 @@ public class DataPacket implements IPacket
     public static final int SIZE = DATA_OVERHEAD + SIZE_DATA;
     private final byte[] channelID;
 
-    private final byte[] byteArray;
     private byte[] ctrPrefix;
     private byte[] encryptedData;
-
-    public DataPacket(byte[] channelID, byte[] fragment)
-    {
-        this.channelID = channelID;
-
-        this.byteArray = fragment;
-        this.ctrPrefix = null;
-        this.encryptedData = null;
-    }
 
     public DataPacket(byte[] channelID, byte[] ctrPrefix, byte[] payload) {
         this.channelID = channelID;
 
         this.ctrPrefix = ctrPrefix;
         this.encryptedData = payload;
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-        bos.write(ctrPrefix, 0, ctrPrefix.length);
-        bos.write(payload, 0, payload.length);
-
-        this.byteArray = bos.toByteArray();
-    }
-
-    public byte[] toBytes()
-    {
-        return this.byteArray;
     }
 
     @Override
     public byte[] getCTRPrefix()
     {
-        if (this.ctrPrefix == null)
-            this.ctrPrefix = Arrays.copyOf(this.byteArray, Counter.CTR_PREFIX_SIZE);
-
         return this.ctrPrefix;
     }
 
@@ -62,9 +34,6 @@ public class DataPacket implements IPacket
     @Override
     public byte[] getData()
     {
-        if (this.encryptedData == null)
-            this.encryptedData = Arrays.copyOfRange(this.byteArray, Counter.CTR_PREFIX_SIZE, this.byteArray.length);
-
         return this.encryptedData;
     }
 
@@ -84,6 +53,6 @@ public class DataPacket implements IPacket
     boolean equals(DataPacket otherPacket)
     {
         // todo can this be more performant?
-        return Arrays.equals(this.byteArray, otherPacket.toBytes());
+        return Arrays.equals(this.encryptedData, otherPacket.getData());
     }
 }

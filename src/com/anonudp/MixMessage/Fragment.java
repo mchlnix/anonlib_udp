@@ -7,12 +7,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static com.anonudp.Constants.MIX_SERVER_COUNT;
-import static com.anonudp.MixMessage.crypto.Counter.CTR_PREFIX_SIZE;
 import static com.anonudp.MixPacket.InitPacket.CHANNEL_KEY_ONION_SIZE;
 
 public class Fragment {
-    public static final int DATA_OVERHEAD = (MIX_SERVER_COUNT-1) * CTR_PREFIX_SIZE;
+    public static final int DATA_OVERHEAD = 0;
     private static final int INIT_OVERHEAD = PublicKey.SIZE + CHANNEL_KEY_ONION_SIZE + InitPacket.PAYLOAD_SIZE;
 
     private static final int DUMMY_PAYLOAD_SIZE = 0;

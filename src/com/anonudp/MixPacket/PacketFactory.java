@@ -10,6 +10,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -18,7 +19,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
-import static com.anonudp.MixMessage.crypto.Counter.CTR_PREFIX_SIZE;
 import static com.anonudp.MixMessage.crypto.EccGroup713.SYMMETRIC_KEY_LENGTH;
 import static com.anonudp.MixMessage.crypto.Util.createCTRCipher;
 import static com.anonudp.MixPacket.InitPacket.CHANNEL_KEY_ONION_SIZE;
@@ -72,14 +72,19 @@ public class PacketFactory {
 
         byte[] processedChannelOnion = cipher.update(packet.getChannelKeyOnion());
 
+        byte[] requestChannelKey = new byte[SYMMETRIC_KEY_LENGTH];
+        byte[] responseChannelKey = new byte[SYMMETRIC_KEY_LENGTH];
+        byte[] encryptedChannelOnion = new byte[CHANNEL_KEY_ONION_SIZE - 2 * SYMMETRIC_KEY_LENGTH];
 
-        // TODO make prettier with all the offsets
-        byte[] requestChannelKey = Arrays.copyOf(processedChannelOnion, SYMMETRIC_KEY_LENGTH);
-        byte[] responseChannelKey = Arrays.copyOfRange(processedChannelOnion, SYMMETRIC_KEY_LENGTH, 2 * SYMMETRIC_KEY_LENGTH);
+        ByteArrayInputStream bis = new ByteArrayInputStream(processedChannelOnion);
+
+        bis.read(requestChannelKey);
+        bis.read(responseChannelKey);
+        bis.read(encryptedChannelOnion);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        bos.write(Arrays.copyOfRange(processedChannelOnion, 2 * SYMMETRIC_KEY_LENGTH, CHANNEL_KEY_ONION_SIZE));
+        bos.write(encryptedChannelOnion);
         bos.write(Util.randomBytes(2 * SYMMETRIC_KEY_LENGTH));
 
         processedChannelOnion = bos.toByteArray();
@@ -96,9 +101,9 @@ public class PacketFactory {
     public ProcessedDataPacket process(DataPacket packet, byte[] channelKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, InvalidAlgorithmParameterException, BadPaddingException, IllegalBlockSizeException {
         Counter counter = new Counter(packet.getCTRPrefix());
 
-        Cipher cipher = com.anonudp.MixMessage.crypto.Util.createCTRCipher(channelKey, counter.asIV(), Cipher.DECRYPT_MODE);
+        Cipher cipher = createCTRCipher(channelKey, counter.asIV(), Cipher.DECRYPT_MODE);
 
-        return new ProcessedDataPacket(packet.getChannelID(), cipher.doFinal(packet.getData()));
+        return new ProcessedDataPacket(packet.getChannelID(), packet.getCTRPrefix(), cipher.doFinal(packet.getData()));
     }
 
     public InitPacket makeInitPacket(Fragment fragment) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
@@ -156,9 +161,7 @@ public class PacketFactory {
     }
 
     public DataPacket makeDataPacket(Fragment fragment) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException, BadPaddingException, IllegalBlockSizeException {
-        byte[] encryptedData = new byte[this.mixCount * CTR_PREFIX_SIZE + Fragment.SIZE_DATA];
-
-        System.arraycopy(fragment.toBytes(), 0, encryptedData, this.mixCount * CTR_PREFIX_SIZE, fragment.toBytes().length);
+        byte[] encryptedFragment = fragment.toBytes();
 
         this.requestCounter.count();
 
@@ -166,18 +169,10 @@ public class PacketFactory {
         {
             Cipher cipher = createCTRCipher(this.requestChannelKeys[i], this.requestCounter.asIV(), Cipher.ENCRYPT_MODE);
 
-            int dataOffset = (i+1) * CTR_PREFIX_SIZE;
-            int dataSize = encryptedData.length - dataOffset;
-
-            byte[] tmpEncrypted = cipher.doFinal(encryptedData, dataOffset, dataSize);
-
-            System.arraycopy(tmpEncrypted,0, encryptedData, dataOffset, dataSize);
-
-            // prepend the counter prefix to the payload
-            System.arraycopy(requestCounter.asBytes(), 0, encryptedData, i * CTR_PREFIX_SIZE, CTR_PREFIX_SIZE);
+            encryptedFragment = cipher.doFinal(encryptedFragment);
         }
 
-        return new DataPacket(this.channelID, encryptedData);
+        return new DataPacket(this.channelID, this.requestCounter.asBytes(), encryptedFragment);
     }
 
     public byte[][] getRequestChannelKeys() {

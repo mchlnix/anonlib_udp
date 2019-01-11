@@ -112,7 +112,7 @@ public class Channel implements Iterator<byte[]> {
                 packet = packetFactory.process(packet, channelKey);
             }
 
-            Fragment fragment = new Fragment(packet.toBytes());
+            Fragment fragment = new Fragment(packet.getData());
 
             this.fragmentPool.addFragment(fragment);
         }

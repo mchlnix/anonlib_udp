@@ -2,6 +2,7 @@ package com.anonudp.MixPacket;
 
 import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.Util;
+import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.PublicKey;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,7 +65,7 @@ class DataPacketFactoryTest extends TestCase {
                 packet = this.factory.process(packet, channelKey);
             }
 
-            assertArrayEquals(dataFragment.toBytes(), packet.toBytes());
+            assertArrayEquals(dataFragment.toBytes(), packet.getData());
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -77,8 +78,10 @@ class DataPacketFactoryTest extends TestCase {
     {
         byte[] payload = Util.randomBytes(200);
 
-        DataPacket packet = new DataPacket(this.channelID, payload);
-        ProcessedDataPacket processedPacket = new ProcessedDataPacket(this.channelID, payload);
+        Counter counter = new Counter();
+
+        DataPacket packet = new DataPacket(this.channelID, counter.asBytes(), payload);
+        ProcessedDataPacket processedPacket = new ProcessedDataPacket(this.channelID, counter.asBytes(), payload);
 
         assertEquals(packet, processedPacket);
         assertEquals(processedPacket, packet);
