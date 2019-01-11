@@ -11,7 +11,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
 public class Util {
-    static final int GCM_BLOCK_SIZE = 16;
     static final int GCM_MAC_SIZE = 16;
     static final int IV_SIZE = 16;
 
@@ -26,10 +25,6 @@ public class Util {
         return cipher;
     }
 
-    public static Cipher createCTRCipher(byte[] symmetricKey, int mode) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
-        return createCTRCipher(symmetricKey, new byte[EccGroup713.SYMMETRIC_KEY_LENGTH], mode);
-    }
-
     public static Cipher createGCM(byte[] symmetricKey, byte[] iv, int mode) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidKeyException {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC");
 
@@ -39,9 +34,5 @@ public class Util {
         cipher.init(mode, keySpec, gcmSpec);
 
         return cipher;
-    }
-
-    public static Cipher createGCM(byte[] symmetricKey, int mode) throws NoSuchProviderException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException {
-        return createGCM(symmetricKey, new byte[EccGroup713.SYMMETRIC_KEY_LENGTH], mode);
     }
 }
