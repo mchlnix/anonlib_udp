@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
 /*
+TODO: Detect the response message ids running out
 TODO: implement Channel Timeout
 TODO: Use Short for Channel-ID?
  */
