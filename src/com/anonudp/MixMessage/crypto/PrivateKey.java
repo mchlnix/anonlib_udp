@@ -1,11 +1,9 @@
 package com.anonudp.MixMessage.crypto;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
+import com.anonudp.MixMessage.crypto.Exception.SymmetricKeyCreationFailed;
+
 import java.math.BigInteger;
-import java.security.*;
+import java.security.SecureRandom;
 
 public class PrivateKey
 {
@@ -32,7 +30,7 @@ public class PrivateKey
         return underlyingValue;
     }
 
-    public PrivateKey blind(PublicKey disposableKey) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
+    public PrivateKey blind(PublicKey disposableKey) throws SymmetricKeyCreationFailed {
         BlindingFactor blindingFactor = new BlindingFactor(disposableKey);
 
         BigInteger newValue = this.underlyingValue.multiply(blindingFactor.getUnderlyingValue());

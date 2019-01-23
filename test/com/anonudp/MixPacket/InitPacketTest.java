@@ -9,22 +9,13 @@ import junit.framework.TestCase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class InitPacketTest extends TestCase {
 
     @DisplayName("Equals works")
     @Test
-    void equals() throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
+    void equals() {
         byte[] channelID = new byte[]{0x0, (byte) 0xe0};
         byte[] payload = Util.randomBytes(100);
 
@@ -53,7 +44,7 @@ class InitPacketTest extends TestCase {
 
     @DisplayName("Not equals works")
     @Test
-    void notEquals() throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
+    void notEquals() {
         byte[] channelID = new byte[]{0x0, (byte) 0xe0};
         byte[] payload = Util.randomBytes(100);
 

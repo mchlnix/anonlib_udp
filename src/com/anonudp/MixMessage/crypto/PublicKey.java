@@ -1,13 +1,12 @@
 package com.anonudp.MixMessage.crypto;
 
+import com.anonudp.MixMessage.crypto.Exception.SymmetricKeyCreationFailed;
 import org.bouncycastle.math.ec.ECPoint;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 public class PublicKey
@@ -26,19 +25,26 @@ public class PublicKey
         this.underlyingValue = point;
     }
 
-    public byte[] toSymmetricKey() throws IOException, NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    public byte[] toSymmetricKey() throws SymmetricKeyCreationFailed {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
 
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        bos.write("aes_key:".getBytes());
-        bos.write(this.underlyingValue.getEncoded(false));
+            bos.write("aes_key:".getBytes());
+            bos.write(this.underlyingValue.getEncoded(false));
 
-        bos.close();
+            bos.close();
 
-        byte[] hash = digest.digest(bos.toByteArray());
+            byte[] hash = digest.digest(bos.toByteArray());
 
-        return Arrays.copyOf(hash, EccGroup713.SYMMETRIC_KEY_LENGTH);
+            return Arrays.copyOf(hash, EccGroup713.SYMMETRIC_KEY_LENGTH);
+        }
+        catch (NoSuchAlgorithmException | IOException e) {
+            throw new SymmetricKeyCreationFailed("Turning public key into symmetric key failed.", e);
+        }
+
     }
 
     public PublicKey blind(PrivateKey privateKey)
@@ -48,13 +54,13 @@ public class PublicKey
         return this.blind(blindingFactor);
     }
 
-    public PublicKey blind(PublicKey publicKey) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
+    public PublicKey blind(PublicKey publicKey) throws SymmetricKeyCreationFailed {
         BlindingFactor blindingFactor = new BlindingFactor(publicKey);
 
         return this.blind(blindingFactor);
     }
 
-    public PublicKey blind(byte[] messageCounterPrefix) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException {
+    public PublicKey blind(byte[] messageCounterPrefix) throws SymmetricKeyCreationFailed {
         byte[] iv = new Counter(messageCounterPrefix).asIV();
         BlindingFactor blindingFactor = new BlindingFactor(iv);
 

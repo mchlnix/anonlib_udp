@@ -1,5 +1,6 @@
 package com.anonudp.MixMessage.crypto;
 
+import com.anonudp.MixMessage.crypto.Exception.SymmetricKeyCreationFailed;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.math.ec.ECPoint;
@@ -7,11 +8,10 @@ import org.bouncycastle.math.ec.ECPoint;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
-import java.security.*;
+import java.security.Security;
+
+import static com.anonudp.MixMessage.crypto.Util.createCTRCipher;
 
 public class EccGroup713 {
     private static final ECParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp224r1");
@@ -45,26 +45,25 @@ public class EccGroup713 {
         return base.multiply(exponent);
     }
 
-    static BigInteger hb(byte[] symmetricKey) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException {
+    static BigInteger hb(byte[] symmetricKey) throws SymmetricKeyCreationFailed {
         byte[] key = EccGroup713.deriveKey(symmetricKey, "hbhbhbhbhbhbhbhb".getBytes());
 
         return EccGroup713.makeExponentFromBytes(key);
     }
 
-    private static byte[] deriveKey(byte[] symmetricKey, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+    private static byte[] deriveKey(byte[] symmetricKey, byte[] iv) throws SymmetricKeyCreationFailed {
         assert symmetricKey.length == iv.length;
         assert symmetricKey.length == EccGroup713.SYMMETRIC_KEY_LENGTH;
 
         byte[] message = new byte[EccGroup713.SYMMETRIC_KEY_LENGTH];
 
-        Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "BC");
+        Cipher cipher = createCTRCipher(symmetricKey, iv, Cipher.ENCRYPT_MODE);
 
-        SecretKeySpec keySpec = new SecretKeySpec(symmetricKey, "AES");
-        IvParameterSpec ivSpec = new IvParameterSpec(iv);
-
-        cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
-
-        return cipher.doFinal(message);
+        try {
+            return cipher.doFinal(message);
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
+            throw new SymmetricKeyCreationFailed("The encryption step failed, when deriving a symmetric key.", e);
+        }
     }
 
     private static BigInteger makeExponentFromBytes(byte[] bytes)

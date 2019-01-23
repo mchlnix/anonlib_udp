@@ -1,14 +1,6 @@
 package com.anonudp.MixMessage.crypto;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import com.anonudp.MixMessage.crypto.Exception.SymmetricKeyCreationFailed;
 
 class BlindingFactor
 {
@@ -18,11 +10,11 @@ class BlindingFactor
         this.underlyingValue = privateKey.getUnderlyingValue();
     }
 
-    BlindingFactor(PublicKey publicKey) throws NoSuchPaddingException, InvalidKeyException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidAlgorithmParameterException, IOException {
+    BlindingFactor(PublicKey publicKey) throws SymmetricKeyCreationFailed {
         this(publicKey.toSymmetricKey());
     }
 
-    BlindingFactor(byte[] symmetricKey) throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException {
+    BlindingFactor(byte[] symmetricKey) throws SymmetricKeyCreationFailed {
         this.underlyingValue = EccGroup713.hb(symmetricKey);
     }
 

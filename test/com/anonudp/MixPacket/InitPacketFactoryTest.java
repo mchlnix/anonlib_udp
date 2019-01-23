@@ -3,6 +3,9 @@ package com.anonudp.MixPacket;
 import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.Util;
 import com.anonudp.MixMessage.crypto.Counter;
+import com.anonudp.MixMessage.crypto.Exception.DecryptionFailed;
+import com.anonudp.MixMessage.crypto.Exception.PacketCreationFailed;
+import com.anonudp.MixMessage.crypto.Exception.SymmetricKeyCreationFailed;
 import com.anonudp.MixMessage.crypto.PrivateKey;
 import com.anonudp.MixMessage.crypto.PublicKey;
 import junit.framework.TestCase;
@@ -10,14 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
 import static com.anonudp.MixMessage.crypto.EccGroup713.SYMMETRIC_KEY_LENGTH;
@@ -140,7 +135,7 @@ class InitPacketFactoryTest extends TestCase {
 
     @DisplayName("Different message counters make different packets")
     @Test
-    void counterMasking() throws NoSuchPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
+    void counterMasking() throws PacketCreationFailed, SymmetricKeyCreationFailed, DecryptionFailed {
         Fragment fragment = new Fragment(1234, 0, Util.randomBytes(10), Fragment.INIT_PAYLOAD_SIZE);
 
         InitPacket original = this.factory.makeInitPacket(fragment);
