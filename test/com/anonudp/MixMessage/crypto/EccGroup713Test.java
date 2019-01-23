@@ -1,20 +1,17 @@
 package com.anonudp.MixMessage.crypto;
 
+import com.anonudp.MixMessage.crypto.Exception.SymmetricKeyCreationFailed;
 import junit.framework.TestCase;
 import org.bouncycastle.math.ec.ECPoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.math.BigInteger;
-import java.security.*;
 import java.util.Arrays;
 
 import static com.anonudp.MixMessage.Util.randomBytes;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class EccGroup713Test extends TestCase {
 
@@ -60,8 +57,8 @@ class EccGroup713Test extends TestCase {
             assertEquals(EccGroup713.hb(randomBytes), EccGroup713.hb(randomBytes));
 
             assertNotEquals(EccGroup713.hb(new byte[arrayLength]), EccGroup713.hb(randomBytes));
-        } catch (NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
+        } catch (SymmetricKeyCreationFailed symmetricKeyCreationFailed) {
+            symmetricKeyCreationFailed.printStackTrace();
             fail();
         }
     }
@@ -76,7 +73,7 @@ class EccGroup713Test extends TestCase {
 
         try {
             assertNotEquals(EccGroup713.hb(new byte[arrayLength]), EccGroup713.hb(randomBytes));
-        } catch (NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
+        } catch (SymmetricKeyCreationFailed e) {
             e.printStackTrace();
             fail();
         }

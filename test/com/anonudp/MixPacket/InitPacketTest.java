@@ -3,6 +3,7 @@ package com.anonudp.MixPacket;
 import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.Util;
 import com.anonudp.MixMessage.crypto.Counter;
+import com.anonudp.MixMessage.crypto.Exception.PacketCreationFailed;
 import com.anonudp.MixMessage.crypto.PrivateKey;
 import com.anonudp.MixMessage.crypto.PublicKey;
 import junit.framework.TestCase;
@@ -15,7 +16,7 @@ class InitPacketTest extends TestCase {
 
     @DisplayName("Equals works")
     @Test
-    void equals() {
+    void equals() throws PacketCreationFailed {
         byte[] channelID = new byte[]{0x0, (byte) 0xe0};
         byte[] payload = Util.randomBytes(100);
 
@@ -44,7 +45,7 @@ class InitPacketTest extends TestCase {
 
     @DisplayName("Not equals works")
     @Test
-    void notEquals() {
+    void notEquals() throws PacketCreationFailed {
         byte[] channelID = new byte[]{0x0, (byte) 0xe0};
         byte[] payload = Util.randomBytes(100);
 

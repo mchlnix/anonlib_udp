@@ -2,6 +2,8 @@ package com.anonudp.MixMessage.crypto;
 
 import com.anonudp.MixMessage.crypto.Exception.SymmetricKeyCreationFailed;
 
+import java.math.BigInteger;
+
 class BlindingFactor
 {
     private BigInteger underlyingValue;

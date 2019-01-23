@@ -4,6 +4,7 @@ import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.Util;
 import com.anonudp.MixMessage.crypto.Exception.DecryptionFailed;
 import com.anonudp.MixMessage.crypto.Exception.EncryptionFailed;
+import com.anonudp.MixMessage.crypto.Exception.PacketCreationFailed;
 import com.anonudp.MixPacket.DataPacket;
 import com.anonudp.MixPacket.IPacket;
 import com.anonudp.MixPacket.PacketFactory;
@@ -15,7 +16,7 @@ class LinkEncryptionTest extends TestCase {
 
     @DisplayName("Checks interoperability of encrypt and decrypt")
     @Test
-    void enAndDecrypt() throws EncryptionFailed, DecryptionFailed {
+    void enAndDecrypt() throws EncryptionFailed, DecryptionFailed, PacketCreationFailed {
         byte[] symmetricKey = Util.randomBytes(EccGroup713.SYMMETRIC_KEY_LENGTH);
 
         byte[] channelID = new byte[]{0x01, 0x02};
