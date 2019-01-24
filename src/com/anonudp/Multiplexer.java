@@ -1,7 +1,9 @@
 package com.anonudp;
 
+import com.anonudp.Exception.ChannelNotFound;
 import com.anonudp.MixChannel.Channel;
 import com.anonudp.MixChannel.IPv4AndPort;
+import com.anonudp.MixChannel.IPv4Pair;
 import com.anonudp.MixMessage.crypto.EccGroup713;
 import com.anonudp.MixMessage.crypto.Exception.DecryptionFailed;
 import com.anonudp.MixMessage.crypto.Exception.EncryptionFailed;
@@ -24,10 +26,14 @@ public class Multiplexer {
 
     private LinkEncryption linkEncryption;
 
-    private HashMap<IPv4AndPort, Channel> channels;
+    private HashMap<IPv4Pair, Channel> channels;
 
-    public Multiplexer(IPv4AndPort firstMix) throws SocketException
+    private TunDevice toUser;
+
+    public Multiplexer(TunDevice tunDevice, IPv4AndPort firstMix) throws SocketException
     {
+        this.toUser = tunDevice;
+
         this.socketToMix = new DatagramSocket();
         this.socketToMix.connect(firstMix.getHost(), firstMix.getPort());
 
@@ -40,15 +46,18 @@ public class Multiplexer {
         this.channels = new HashMap<>();
     }
 
-    public void addChannel(IPv4AndPort destination, PublicKey[] mixKeys) throws IOException
+    public void addChannel(IPv4AndPort source, IPv4AndPort destination, PublicKey[] mixKeys) throws IOException
     {
         Channel channel = new Channel(destination, mixKeys);
 
-        this.channels.put(destination, channel);
+        this.channels.put(new IPv4Pair(source, destination), channel);
     }
 
-    public void sendToMix(IPv4AndPort destination, byte[] payload) throws EncryptionFailed, PacketCreationFailed, IOException {
-        Channel channel = channels.get(destination);
+    public void sendToMix(IPv4AndPort source, IPv4AndPort destination, byte[] payload) throws EncryptionFailed, PacketCreationFailed, IOException, ChannelNotFound {
+        Channel channel = channels.get(new IPv4Pair(source, destination));
+
+        if (channel == null)
+            throw new ChannelNotFound("Channel for " + source + " " + destination + " not found.");
 
         DatagramPacket mixPacket;
 
@@ -64,15 +73,24 @@ public class Multiplexer {
 
     private void receivedPacketToUser(byte[] payload)
     {
-        // do something here
-        System.out.println(new String(payload));
+        /*
+         * Prepare the UDP packet with header etc.
+         */
+
+        this.toUser.receiveResponse(payload);
     }
 
     private void packetToChannel(IPacket mixPacket) {
         int channelID = bytesToUnsignedInt(mixPacket.getChannelID());
+
+        Channel channel;
         try
         {
-            Channel.table.get(channelID).response(mixPacket);
+            channel = Channel.table.get(channelID);
+            channel.response(mixPacket);
+
+            if (channel.hasNext())
+                this.receivedPacketToUser(channel.next());
         }
         catch (NullPointerException npe)
         {
