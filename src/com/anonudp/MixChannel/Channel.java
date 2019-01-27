@@ -27,6 +27,7 @@ public class Channel {
     static final int HIGHEST_ID = Double.valueOf(Math.pow(2, Byte.SIZE * ID_SIZE) - 1).intValue();
     public static final HashMap<Integer, Channel> table = new HashMap<>();
 
+    private int id;
     private PacketFactory packetFactory;
 
     private Counter requestCounter;
@@ -39,7 +40,7 @@ public class Channel {
     private PacketListener listener;
 
     public Channel(PacketListener listener, IPv4AndPort destination, PublicKey[] mixPublicKeys) throws IOException {
-        int id = Channel.randomID();
+        this.id = Channel.randomID();
         byte[] idBytes = new byte[2];
 
         idBytes[0] = (byte) ((id & 0xFF00) >> 8);
@@ -113,7 +114,7 @@ public class Channel {
             this.fragmentPool.addFragment(fragment);
 
             if (this.fragmentPool.hasNext())
-                this.listener.receivePacket(this.fragmentPool.next());
+                this.listener.receivePacket(this.id, this.fragmentPool.next());
         }
     }
 

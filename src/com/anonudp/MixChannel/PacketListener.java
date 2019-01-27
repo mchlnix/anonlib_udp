@@ -1,5 +1,5 @@
 package com.anonudp.MixChannel;
 
 public interface PacketListener {
-    public void receivePacket(byte[] udpPayload);
+    public void receivePacket(int id, byte[] udpPayload);
 }
