@@ -12,7 +12,9 @@ import com.anonudp.MixPacket.IPacket;
 import com.anonudp.MixPacket.PacketFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 /*
@@ -20,7 +22,7 @@ TODO: Detect the response message ids running out
 TODO: implement Channel Timeout
 TODO: Use Short for Channel-ID?
  */
-public class Channel implements Iterator<byte[]> {
+public class Channel {
     public static final int ID_SIZE = 2; // byte
     static final int HIGHEST_ID = Double.valueOf(Math.pow(2, Byte.SIZE * ID_SIZE) - 1).intValue();
     public static final HashMap<Integer, Channel> table = new HashMap<>();
@@ -34,7 +36,9 @@ public class Channel implements Iterator<byte[]> {
 
     private FragmentPool fragmentPool;
 
-    public Channel(IPv4AndPort destination, PublicKey[] mixPublicKeys) throws IOException {
+    private PacketListener listener;
+
+    public Channel(PacketListener listener, IPv4AndPort destination, PublicKey[] mixPublicKeys) throws IOException {
         int id = Channel.randomID();
         byte[] idBytes = new byte[2];
 
@@ -49,6 +53,8 @@ public class Channel implements Iterator<byte[]> {
         this.initialized = false;
 
         this.fragmentPool = new FragmentPool();
+
+        this.listener = listener;
 
         Channel.table.put(id, this);
     }
@@ -105,6 +111,9 @@ public class Channel implements Iterator<byte[]> {
             Fragment fragment = new Fragment(packet.getData());
 
             this.fragmentPool.addFragment(fragment);
+
+            if (this.fragmentPool.hasNext())
+                this.listener.receivePacket(this.fragmentPool.next());
         }
     }
 
@@ -131,17 +140,5 @@ public class Channel implements Iterator<byte[]> {
     void _setInitialized()
     {
         this.initialized = true;
-    }
-
-    /* Iterator methods */
-
-    @Override
-    public boolean hasNext() {
-        return this.fragmentPool.hasNext();
-    }
-
-    @Override
-    public byte[] next() {
-        return this.fragmentPool.next();
     }
 }
