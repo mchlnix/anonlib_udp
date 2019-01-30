@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import static com.anonudp.MixMessage.crypto.EccGroup713.SYMMETRIC_KEY_LENGTH;
@@ -59,6 +60,22 @@ class InitPacketFactoryTest extends TestCase {
 
         this.factory = new PacketFactory(channelID, initPayload, publicMixKeys);
     }
+
+    @DisplayName("Encryption takes place")
+    @Test
+    void encryptionTest() throws PacketCreationFailed, IOException, SymmetricKeyCreationFailed, DecryptionFailed
+    {
+        Fragment initFragment = new Fragment(1234, 0, this.payload, Fragment.INIT_PAYLOAD_SIZE);
+
+        assertEquals(initFragment.toBytes().length, Fragment.SIZE_INIT);
+
+        InitPacket packet = this.factory.makeInitPacket(initFragment);
+
+        ProcessedInitPacket processedPacket = this.factory.process(packet, this.privateMixKeys[0]);
+
+        assertFalse(Arrays.equals(packet.getData(), processedPacket.getData()));
+    }
+
 
     @DisplayName("Same data after making and processing a InitPacket")
     @Test

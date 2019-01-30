@@ -23,8 +23,6 @@ public class EccGroup713 {
                 + "B70E0CBD6BB4BF7F321390B94A03C1D356C21122343280D6115C1D21"
                 + "BD376388B5F723FB4C22DFE6CD4375A05A07476444D5819985007E34"));
         return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
-
-
     }
 
     private static final X9ECParameters spec = createParametersSECP224R1();

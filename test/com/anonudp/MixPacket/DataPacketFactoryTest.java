@@ -9,6 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class DataPacketFactoryTest extends TestCase {
@@ -45,6 +48,23 @@ class DataPacketFactoryTest extends TestCase {
             e.printStackTrace();
             fail();
         }
+    }
+
+    @DisplayName("Encryption takes place")
+    @Test
+    void testEncryption() throws IOException
+    {
+        DataPacket packet = null;
+
+        Fragment dataFragment = new Fragment(1234, 0, this.payload, Fragment.DATA_PAYLOAD_SIZE);
+        try {
+            packet = this.factory.makeDataPacket(dataFragment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+
+        assertFalse(Arrays.equals(dataFragment.toBytes(), packet.getData()));
     }
 
     @DisplayName("Same data after making and processing a DataPacket")
