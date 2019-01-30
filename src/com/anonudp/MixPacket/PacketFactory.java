@@ -2,23 +2,21 @@ package com.anonudp.MixPacket;
 
 import com.anonudp.MixMessage.Fragment;
 import com.anonudp.MixMessage.Util;
+import com.anonudp.MixMessage.crypto.CTRCipher;
 import com.anonudp.MixMessage.crypto.Counter;
 import com.anonudp.MixMessage.crypto.Exception.DecryptionFailed;
 import com.anonudp.MixMessage.crypto.Exception.PacketCreationFailed;
 import com.anonudp.MixMessage.crypto.Exception.SymmetricKeyCreationFailed;
 import com.anonudp.MixMessage.crypto.PrivateKey;
 import com.anonudp.MixMessage.crypto.PublicKey;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
 import static com.anonudp.MixMessage.crypto.EccGroup713.SYMMETRIC_KEY_LENGTH;
-import static com.anonudp.MixMessage.crypto.Util.createCTRCipher;
 import static com.anonudp.MixPacket.InitPacket.CHANNEL_KEY_ONION_SIZE;
 
 public class PacketFactory {
@@ -57,7 +55,7 @@ public class PacketFactory {
         this.requestCounter.count();
     }
 
-    public ProcessedInitPacket process(InitPacket packet, PrivateKey privateKey) throws SymmetricKeyCreationFailed, DecryptionFailed {
+    ProcessedInitPacket process(InitPacket packet, PrivateKey privateKey) throws SymmetricKeyCreationFailed, DecryptionFailed {
 
         /* create shared key, originally used to encrypt */
         PublicKey disposableKey = packet.getPublicKey().blind(privateKey).blind(packet.getMessageID());
@@ -66,17 +64,18 @@ public class PacketFactory {
 
         /* decrypt channel key and payload */
 
-        Cipher cipher = createCTRCipher(symmetricDisposableKey, new Counter(packet.getMessageID()).asIV(), Cipher.DECRYPT_MODE);
+        CTRCipher cipher = CTRCipher.getCipher(symmetricDisposableKey, new Counter(packet.getMessageID()).asIV(), CTRCipher.DECRYPT_MODE);
 
-        byte[] processedChannelOnion = cipher.update(packet.getChannelKeyOnion());
+        try
+        {
+            byte[] decryptedChannelOnion = cipher.decryptBuffer(packet.getChannelKeyOnion());
 
-        byte[] requestChannelKey = new byte[SYMMETRIC_KEY_LENGTH];
-        byte[] responseChannelKey = new byte[SYMMETRIC_KEY_LENGTH];
-        byte[] encryptedChannelOnion = new byte[CHANNEL_KEY_ONION_SIZE - 2 * SYMMETRIC_KEY_LENGTH];
+            byte[] requestChannelKey = new byte[SYMMETRIC_KEY_LENGTH];
+            byte[] responseChannelKey = new byte[SYMMETRIC_KEY_LENGTH];
+            byte[] encryptedChannelOnion = new byte[CHANNEL_KEY_ONION_SIZE - 2 * SYMMETRIC_KEY_LENGTH];
 
-        ByteArrayInputStream bis = new ByteArrayInputStream(processedChannelOnion);
+            ByteArrayInputStream bis = new ByteArrayInputStream(decryptedChannelOnion);
 
-        try {
             assert bis.read(requestChannelKey) == requestChannelKey.length;
             assert bis.read(responseChannelKey) == responseChannelKey.length;
             assert bis.read(encryptedChannelOnion) == encryptedChannelOnion.length;
@@ -86,16 +85,18 @@ public class PacketFactory {
             bos.write(encryptedChannelOnion);
             bos.write(Util.randomBytes(2 * SYMMETRIC_KEY_LENGTH));
 
-            processedChannelOnion = bos.toByteArray();
+            byte[] processedChannelOnion = bos.toByteArray();
 
-            byte[] processedPayloadOnion = cipher.doFinal(packet.getPayloadOnion());
+            assert processedChannelOnion.length == packet.getChannelKeyOnion().length;
+
+            byte[] processedPayloadOnion = cipher.decryptBuffer(packet.getPayloadOnion());
 
             /* generate next public key */
 
             PublicKey newElement = packet.getPublicKey().blind(disposableKey);
 
             return new ProcessedInitPacket(this.channelID, packet.getMessageID(), requestChannelKey, responseChannelKey, newElement, processedChannelOnion, processedPayloadOnion);
-        } catch (BadPaddingException | IOException | IllegalBlockSizeException e) {
+        } catch (InvalidCipherTextException | IOException e) {
             throw new DecryptionFailed("Couldn't decrypt init packet.", e);
         }
     }
@@ -103,13 +104,13 @@ public class PacketFactory {
     public ProcessedDataPacket process(DataPacket packet, byte[] channelKey) throws DecryptionFailed {
         Counter counter = new Counter(packet.getMessageID());
 
-        Cipher cipher = createCTRCipher(channelKey, counter.asIV(), Cipher.DECRYPT_MODE);
+        CTRCipher cipher = CTRCipher.getCipher(channelKey, counter.asIV(), CTRCipher.DECRYPT_MODE);
 
         try
         {
-            return new ProcessedDataPacket(packet.getChannelID(), packet.getMessageID(), cipher.doFinal(packet.getData()));
+            return new ProcessedDataPacket(packet.getChannelID(), packet.getMessageID(), cipher.decryptBuffer(packet.getData()));
         }
-        catch (BadPaddingException | IllegalBlockSizeException e) {
+        catch (InvalidCipherTextException e) {
             throw new DecryptionFailed("Could not decrypt data packet.", e);
         }
     }
@@ -148,27 +149,27 @@ public class PacketFactory {
 
             /* encrypt "onions" */
 
-            Cipher cipher;
+            CTRCipher cipher;
             bos = new ByteArrayOutputStream();
 
             for (int i = disposableKeys.length - 1; i >= 0; --i)
             {
-                cipher = createCTRCipher(disposableKeys[i].toSymmetricKey(), this.requestCounter.asIV(), Cipher.ENCRYPT_MODE);
+                cipher = CTRCipher.getCipher(disposableKeys[i].toSymmetricKey(), this.requestCounter.asIV(), CTRCipher.ENCRYPT_MODE);
 
                 bos.write(this.requestChannelKeys[i]);
                 bos.write(this.responseChannelKeys[i]);
                 bos.write(Arrays.copyOf(channelOnion, channelOnion.length - 2 * SYMMETRIC_KEY_LENGTH));
 
-                channelOnion = cipher.update(bos.toByteArray());
+                channelOnion = cipher.decryptBuffer(bos.toByteArray());
 
-                payloadOnion = cipher.doFinal(payloadOnion);
+                payloadOnion = cipher.decryptBuffer(payloadOnion);
 
                 bos.reset();
             }
 
             return new InitPacket(channelID, this.requestCounter.asBytes(), publicMessageKey, channelOnion, payloadOnion);
         }
-        catch (SymmetricKeyCreationFailed | IOException | IllegalBlockSizeException | BadPaddingException e) {
+        catch (SymmetricKeyCreationFailed | IOException | InvalidCipherTextException e) {
             throw new PacketCreationFailed("Couldn't create channel initialization packet.", e);
         }
     }
@@ -183,14 +184,14 @@ public class PacketFactory {
 
             for(int i = this.mixCount - 1; i >= 0 ; --i)
             {
-                Cipher cipher = createCTRCipher(this.requestChannelKeys[i], this.requestCounter.asIV(), Cipher.ENCRYPT_MODE);
+                CTRCipher cipher = CTRCipher.getCipher(this.requestChannelKeys[i], this.requestCounter.asIV(), CTRCipher.ENCRYPT_MODE);
 
-                encryptedFragment = cipher.doFinal(encryptedFragment);
+                encryptedFragment = cipher.encryptBuffer(encryptedFragment);
             }
 
             return new DataPacket(this.channelID, this.requestCounter.asBytes(), encryptedFragment);
         }
-        catch (IOException | BadPaddingException | IllegalBlockSizeException e) {
+        catch (IOException | InvalidCipherTextException e) {
             throw new PacketCreationFailed("Couldn't create data packet.", e);
         }
     }

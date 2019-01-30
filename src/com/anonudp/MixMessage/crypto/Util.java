@@ -1,38 +1,25 @@
 package com.anonudp.MixMessage.crypto;
 
-import com.anonudp.MixMessage.crypto.Exception.AESCTRException;
-import com.anonudp.MixMessage.crypto.Exception.AESGCMException;
-
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import org.bouncycastle.crypto.engines.AESFastEngine;
+import org.bouncycastle.crypto.modes.AEADBlockCipher;
+import org.bouncycastle.crypto.modes.GCMBlockCipher;
+import org.bouncycastle.crypto.modes.SICBlockCipher;
+import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.params.AEADParameters;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
 
 public class Util {
     static final int GCM_MAC_SIZE = 16;
     static final int IV_SIZE = 16;
 
-    public static Cipher createCTRCipher(byte[] symmetricKey, byte[] iv, int mode) throws AESCTRException {
-        Cipher cipher;
-        try {
-            cipher = Cipher.getInstance("AES/CTR/NoPadding", "BC");
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
-            throw new AESCTRException("Could not get instance of AES Counter Cipher.", e);
-        }
+    @Deprecated
+    public static PaddedBufferedBlockCipher createCTRCipher(byte[] symmetricKey, byte[] iv, boolean shouldEncrypt) {
+        PaddedBufferedBlockCipher cipher;
 
-        SecretKeySpec keySpec = new SecretKeySpec(symmetricKey, "AES");
-        IvParameterSpec ivSpec = new IvParameterSpec(iv);
+        cipher = new PaddedBufferedBlockCipher(new SICBlockCipher(new AESFastEngine()));
 
-        try {
-            cipher.init(mode, keySpec, ivSpec);
-        } catch (InvalidAlgorithmParameterException | InvalidKeyException e) {
-            throw new AESCTRException("Could not initialize AES Counter Cipher.", e);
-        }
+        cipher.init(shouldEncrypt, new ParametersWithIV(new KeyParameter(symmetricKey), iv));
 
         return cipher;
     }
