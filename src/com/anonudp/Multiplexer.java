@@ -43,20 +43,19 @@ public class Multiplexer {
         this.socketToMix.send(mixPacket);
     }
 
-    private void packetToChannel(IPacket mixPacket) {
+    private void packetToChannel(IPacket mixPacket) throws DecryptionFailed
+    {
         int channelID = bytesToUnsignedInt(mixPacket.getChannelID());
 
         Channel channel;
         try
         {
-            channel = Channel.table.get(channelID);
+            channel = (Channel) Channel.table.get(channelID);
             channel.response(mixPacket);
         }
         catch (NullPointerException npe)
         {
             System.out.println("The response mix packet is for a channel not known to the multiplexer. Invalid channel id.");
-        } catch (DecryptionFailed df) {
-            df.printStackTrace();
         }
     }
 

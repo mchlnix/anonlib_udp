@@ -96,7 +96,7 @@ class ReplayDetectionTest extends TestCase {
 
     @DisplayName("Try all numbers")
     @Test
-    @Disabled
+    @Disabled("Takes a long time.")
     void tryAll()
     {
         long upperBound = Integer.MAX_VALUE;

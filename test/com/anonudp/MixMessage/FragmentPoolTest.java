@@ -102,10 +102,13 @@ class FragmentPoolTest extends TestCase {
     @Test
     void next() {
         this.pool.addFragment(this.single_fragment);
+
+        assertTrue(this.pool.hasNext());
+        assertArrayEquals(this.single_fragment_payload, this.pool.next());
+
         this.pool.addFragment(this.double_fragment_part1);
         this.pool.addFragment(this.double_fragment_part2);
 
-        assertArrayEquals(this.single_fragment_payload, this.pool.next());
         assertArrayEquals(this.double_fragment_payload, this.pool.next());
 
         assertThrows(FragmentPool.NoCompleteMessagesException.class, () -> this.pool.next());
