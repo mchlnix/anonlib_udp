@@ -1,25 +1,36 @@
 package com.anonudp.MixMessage;
 
-import java.util.HashMap;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class FragmentPool implements Iterator<byte[]> {
-    private final HashMap<Integer, Message> messages;
+    private final Hashtable messages;
+    private Message nextMessage = null;
 
     public FragmentPool()
     {
-        this.messages = new HashMap<>();
+        this.messages = new Hashtable();
     }
 
     public void addFragment(Fragment fragment)
     {
         int message_id = fragment.getMessage_id();
 
-        if (! this.messages.containsKey(message_id))
-            this.messages.put(message_id, new Message(message_id));
+        Message message;
 
-        this.messages.get(message_id).addFragment(fragment);
+        if (! this.messages.containsKey(message_id))
+        {
+            message = new Message(message_id);
+            this.messages.put(message_id, message);
+        }
+        else
+        {
+            message = (Message) this.messages.get(message_id);
+        }
+
+        message.addFragment(fragment);
     }
 
     int size()
@@ -29,10 +40,19 @@ public class FragmentPool implements Iterator<byte[]> {
 
     @Override
     public boolean hasNext() {
-        for (int message_id : this.messages.keySet())
+        if (this.nextMessage != null)
+            return true;
+
+        Enumeration tableElements = this.messages.elements();
+
+        while (tableElements.hasMoreElements())
         {
-            if (this.messages.get(message_id).isDone())
+            Message message = (Message) tableElements.nextElement();
+
+            if (message.isDone())
             {
+                this.nextMessage = message;
+
                 return true;
             }
         }
@@ -42,15 +62,19 @@ public class FragmentPool implements Iterator<byte[]> {
 
     @Override
     public byte[] next() {
-        for (int message_id : this.messages.keySet())
+        if (this.nextMessage == null && !this.hasNext())
         {
-            if (this.messages.get(message_id).isDone())
-            {
-                return this.messages.remove(message_id).getPayload();
-            }
+            throw new NoCompleteMessagesException();
         }
+        else
+        {
+            byte[] payload = this.nextMessage.getPayload();
+            this.messages.remove(this.nextMessage.getId());
 
-        throw new NoCompleteMessagesException();
+            this.nextMessage = null;
+
+            return payload;
+        }
     }
 
     class NoCompleteMessagesException extends NoSuchElementException

@@ -1,11 +1,13 @@
 package com.anonudp.MixMessage.crypto;
 
-import java.util.PriorityQueue;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class ReplayDetection {
     public static final int SIZE = 20;
     private static final int START_VALUE = 0;
-    private final PriorityQueue<Integer> alreadySeen = new PriorityQueue<>(SIZE, Integer::compareUnsigned);
+    private static final int SMALLEST_ELEMENT = 0;
+    private final ArrayList alreadySeen = new ArrayList(SIZE + 1);
 
     public ReplayDetection()
     {
@@ -31,12 +33,13 @@ public class ReplayDetection {
             return false;
 
         boolean notAlreadySeen = ! alreadySeen.contains(packetID);
-        boolean notTooSmall = ! (Integer.compareUnsigned(packetID, alreadySeen.peek()) < 0);
+        boolean notTooSmall = ! (Integer.compareUnsigned(packetID, (int) alreadySeen.get(SMALLEST_ELEMENT)) < 0);
 
         if (notAlreadySeen && notTooSmall)
         {
             alreadySeen.add(packetID);
-            alreadySeen.poll();
+            Collections.sort(alreadySeen);
+            alreadySeen.remove(SMALLEST_ELEMENT);
         }
 
         return notAlreadySeen && notTooSmall;

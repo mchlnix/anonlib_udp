@@ -6,13 +6,13 @@ import java.util.HashMap;
 
 class Message {
     private final int id;
-    private final HashMap<Integer, byte[]> payloads;
+    private final HashMap payloads;
     private int fragment_count;
 
     public Message(int id)
     {
         this.id = id;
-        this.payloads = new HashMap<>();
+        this.payloads = new HashMap();
         this.fragment_count = -1;
     }
 
@@ -22,9 +22,9 @@ class Message {
 
         if (this.payloads.containsKey(fragment.getFragment_number()))
             throw new DuplicateFragmentException(fragment.getFragment_number());
-        
+
         this.payloads.put(fragment.getFragment_number(), fragment.getPayload());
-        
+
         if (fragment.isLast())
             this.fragment_count = fragment.getFragment_number() + 1;
     }
@@ -39,17 +39,27 @@ class Message {
         if (! this.isDone())
             return new byte[0];
 
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        try {
             for (int i = 0; i < this.fragment_count; ++i)
             {
-                bos.write(this.payloads.get(i));
+                byte[] payloadPart = (byte[]) (this.payloads.get(i));
+
+                bos.write(payloadPart);
             }
 
             return bos.toByteArray();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
             return new byte[0];
         }
+    }
+
+    public int getId()
+    {
+        return id;
     }
 
     public class DuplicateFragmentException extends IllegalArgumentException

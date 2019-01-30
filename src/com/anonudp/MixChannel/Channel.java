@@ -25,7 +25,7 @@ TODO: Use Short for Channel-ID?
 public class Channel {
     public static final int ID_SIZE = 2; // byte
     static final int HIGHEST_ID = Double.valueOf(Math.pow(2, Byte.SIZE * ID_SIZE) - 1).intValue();
-    public static final HashMap<Integer, Channel> table = new HashMap<>();
+    public static final HashMap table = new HashMap();
 
     private int id;
     private PacketFactory packetFactory;
@@ -61,7 +61,7 @@ public class Channel {
     }
 
     public IPacket[] request(byte[] udpPayload) throws PacketCreationFailed {
-        ArrayList<IPacket> returnPackets = new ArrayList<>();
+        ArrayList returnPackets = new ArrayList();
 
         this.requestCounter.count();
         int fragmentNumber = 0;
@@ -91,7 +91,7 @@ public class Channel {
             ++fragmentNumber;
         }
 
-        return returnPackets.toArray(new IPacket[0]);
+        return (IPacket[]) returnPackets.toArray(new IPacket[0]);
     }
 
     public void response(IPacket response) throws DecryptionFailed {
