@@ -1,20 +1,33 @@
 package com.anonudp.MixMessage.crypto;
 
 import com.anonudp.MixMessage.crypto.Exception.SymmetricKeyCreationFailed;
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.asn1.x9.X9ECPoint;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.custom.sec.SecP224R1Curve;
+import org.bouncycastle.util.encoders.Hex;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 import java.math.BigInteger;
 import java.security.Security;
 
-import static com.anonudp.MixMessage.crypto.Util.createCTRCipher;
-
 public class EccGroup713 {
-    private static final ECParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp224r1");
+    /*
+     * secp224r1
+     */
+    private static X9ECParameters createParametersSECP224R1() {
+        byte[] S = Hex.decode("BD71344799D5C7FCDC45B59FA3B9AB8F6A948BC5");
+        ECCurve curve = new SecP224R1Curve();
+        X9ECPoint G = new X9ECPoint(curve, Hex.decode("04"
+                + "B70E0CBD6BB4BF7F321390B94A03C1D356C21122343280D6115C1D21"
+                + "BD376388B5F723FB4C22DFE6CD4375A05A07476444D5819985007E34"));
+        return new X9ECParameters(curve, G, curve.getOrder(), curve.getCofactor(), S);
+
+
+    }
+
+    private static final X9ECParameters spec = createParametersSECP224R1();
     private static final ECPoint generator = spec.getG();
     private static final BigInteger order = spec.getCurve().getOrder();
 
@@ -45,25 +58,31 @@ public class EccGroup713 {
         return base.multiply(exponent);
     }
 
-    static BigInteger hb(byte[] symmetricKey) throws SymmetricKeyCreationFailed {
+    static BigInteger hb(byte[] symmetricKey) throws SymmetricKeyCreationFailed
+    {
         byte[] key = EccGroup713.deriveKey(symmetricKey, "hbhbhbhbhbhbhbhb".getBytes());
 
         return EccGroup713.makeExponentFromBytes(key);
     }
 
-    private static byte[] deriveKey(byte[] symmetricKey, byte[] iv) throws SymmetricKeyCreationFailed {
+    private static byte[] deriveKey(byte[] symmetricKey, byte[] iv) throws SymmetricKeyCreationFailed
+    {
         assert symmetricKey.length == iv.length;
         assert symmetricKey.length == EccGroup713.SYMMETRIC_KEY_LENGTH;
 
-        byte[] message = new byte[EccGroup713.SYMMETRIC_KEY_LENGTH];
+        byte[] derivedKey = new byte[EccGroup713.SYMMETRIC_KEY_LENGTH];
 
-        Cipher cipher = createCTRCipher(symmetricKey, iv, Cipher.ENCRYPT_MODE);
+        CTRCipher cipher = CTRCipher.getCipher(symmetricKey, iv, CTRCipher.ENCRYPT_MODE);
 
-        try {
-            return cipher.doFinal(message);
-        } catch (IllegalBlockSizeException | BadPaddingException e) {
+        try
+        {
+            derivedKey = cipher.encryptBuffer(derivedKey);
+        } catch (InvalidCipherTextException e)
+        {
             throw new SymmetricKeyCreationFailed("The encryption step failed, when deriving a symmetric key.", e);
         }
+
+        return derivedKey;
     }
 
     private static BigInteger makeExponentFromBytes(byte[] bytes)
