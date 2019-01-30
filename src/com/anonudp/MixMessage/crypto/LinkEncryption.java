@@ -6,10 +6,9 @@ import com.anonudp.MixMessage.crypto.Exception.EncryptionFailed;
 import com.anonudp.MixPacket.DataPacket;
 import com.anonudp.MixPacket.IPacket;
 import com.anonudp.MixPacket.InitResponse;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.modes.AEADBlockCipher;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,31 +31,41 @@ public class LinkEncryption {
     public byte[] encrypt(IPacket packet) throws EncryptionFailed {
         this.counter.count();
 
-        Cipher gcm = Util.createGCM(this.key, this.counter.asIV(), Cipher.ENCRYPT_MODE);
+        AEADBlockCipher gcm = Util.createGCM(this.key, this.counter.asIV(), true);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
             bos.write(this.counter.asBytes());
 
-            gcm.update(packet.getChannelID());
-            gcm.update(packet.getMessageID());
+            byte[] out = new byte[DataPacket.SIZE];
+            byte[] in = packet.getChannelID();
 
-            bos.write(gcm.doFinal(new byte[]{packet.getPacketType()}));
+            int outOffset = gcm.processBytes(in, 0, in.length, out, 0);
+
+            in = packet.getMessageID();
+
+            outOffset += gcm.processBytes(in, 0, in.length, out, outOffset);
+            outOffset += gcm.processByte(packet.getPacketType(), out, outOffset);
+            outOffset += gcm.doFinal(out, outOffset);
+
+            bos.write(out, 0, outOffset);
 
             bos.write(packet.getData());
-
-            return bos.toByteArray();
-        } catch (IOException | IllegalBlockSizeException | BadPaddingException e) {
+        }
+        catch (IOException | InvalidCipherTextException e)
+        {
             throw new EncryptionFailed("Couldn't link-encrypt the mix packet " + this.counter.asInt() + ".", e);
         }
+
+        return bos.toByteArray();
 
     }
 
     public IPacket decrypt(byte[] packetBytes) throws DecryptionFailed {
         Counter linkPrefix = new Counter(packetBytes);
 
-        Cipher gcm = Util.createGCM(this.key, linkPrefix.asIV(), Cipher.DECRYPT_MODE);
+        AEADBlockCipher gcm = Util.createGCM(this.key, linkPrefix.asIV(), false);
 
         ByteArrayInputStream bis = new ByteArrayInputStream(packetBytes);
 
@@ -71,9 +80,12 @@ public class LinkEncryption {
 
             bis.close();
 
-            byte[] plainLinkHeader = gcm.doFinal(cipherTextAndMac);
+            byte[] plainLinkHeader = new byte[cipherTextAndMac.length];
+            int outOffset = gcm.processBytes(cipherTextAndMac, 0, cipherTextAndMac.length, plainLinkHeader, 0);
 
-            bis = new ByteArrayInputStream(plainLinkHeader);
+            outOffset += gcm.doFinal(plainLinkHeader, outOffset);
+
+            bis = new ByteArrayInputStream(plainLinkHeader, 0, outOffset);
 
             byte[] channelID = new byte[Channel.ID_SIZE];
             byte[] messagePrefix = new byte[Counter.SIZE];
@@ -92,7 +104,9 @@ public class LinkEncryption {
                 returnPacket = new InitResponse(channelID, payload);
 
             return returnPacket;
-        } catch (BadPaddingException | IllegalBlockSizeException | IOException e) {
+        }
+        catch (IOException | InvalidCipherTextException e)
+        {
             throw new DecryptionFailed("Couldn't link-decrypt the mix packet " + linkPrefix.asInt() + ".", e);
         }
     }

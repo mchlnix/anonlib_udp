@@ -37,22 +37,14 @@ public class Util {
         return cipher;
     }
 
-    public static Cipher createGCM(byte[] symmetricKey, byte[] iv, int mode) throws AESGCMException {
-        Cipher cipher;
-        try {
-            cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC");
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException e) {
-            throw new AESGCMException("Could not get instance of AES GCM Cipher.", e);
-        }
+    static AEADBlockCipher createGCM(byte[] symmetricKey, byte[] iv, boolean shouldEncrypt) {
+        GCMBlockCipher cipher;
 
-        SecretKeySpec keySpec = new SecretKeySpec(symmetricKey, "AES");
-        GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_MAC_SIZE * Byte.SIZE, iv);
+        cipher = new GCMBlockCipher(new AESFastEngine());
 
-        try {
-            cipher.init(mode, keySpec, gcmSpec);
-        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-            throw new AESGCMException("Could not initialize AES Counter Cipher.", e);
-        }
+        AEADParameters keySpec = new AEADParameters(new KeyParameter(symmetricKey), Byte.SIZE * GCM_MAC_SIZE, iv, null);
+
+        cipher.init(shouldEncrypt, keySpec);
 
         return cipher;
     }
